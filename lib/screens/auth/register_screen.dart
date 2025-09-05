@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:love_in_action/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/supabase_provider.dart';
+import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
 import 'login_screen.dart';
@@ -16,6 +17,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -25,6 +27,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -41,72 +44,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       EasyLoadingConfig.showLoading();
 
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
-      await supabaseProvider.signUp(
+      final strapiAuthProvider =
+          Provider.of<StrapiAuthProvider>(context, listen: false);
+      await strapiAuthProvider.register(
         _emailController.text.trim(),
         _passwordController.text,
+        username: _usernameController.text.trim(),
       );
 
       if (mounted) {
-        print(
-            '🎉 [REGISTER] SignUp completed successfully, showing success message');
         EasyLoadingConfig.dismiss();
-        EasyLoadingConfig.showToast(
-            'Account created successfully! Please check your email to confirm your account.');
-
-        // Navigate to main app after successful registration
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const MainAppScreen(),
-          ),
-        );
+        final hasToken = strapiAuthProvider.jwt != null && strapiAuthProvider.jwt!.isNotEmpty;
+        if (hasToken) {
+          EasyLoadingConfig.showToast('Account created! Logged in successfully.');
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const MainAppScreen(),
+            ),
+          );
+        } else {
+          // Email confirmation enabled: no JWT until email is confirmed
+          EasyLoadingConfig.showToast('Account created! Please check your email to confirm your account before signing in.');
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const LoginScreen(),
+            ),
+          );
+        }
       }
     } catch (error) {
-      print('❌ [REGISTER] Error occurred:');
-      print('❌ [REGISTER] Error type: ${error.runtimeType}');
-      print('❌ [REGISTER] Error message: $error');
-      print('❌ [REGISTER] Error toString: ${error.toString()}');
-
-      // Check if it's an AuthRetryableFetchException specifically
-      if (error.runtimeType
-          .toString()
-          .contains('AuthRetryableFetchException')) {
-        print(
-            '🔄 [REGISTER] AuthRetryableFetchException detected - this is a Supabase service issue');
-      }
-
       if (mounted) {
         String errorMessage = error.toString().replaceAll('Exception: ', '');
-
-        // Handle specific Supabase errors
-        if (errorMessage.contains('Error sending confirmation email') ||
-            errorMessage.contains('error sending confirmation email') ||
-            errorMessage.contains('unexpected_failure')) {
-          errorMessage =
-              'Signup failed due to a temporary service issue. Please try again in a few minutes.';
-          print(
-              '📧 [REGISTER] Email confirmation service issue detected - signup actually failed');
-        } else if (errorMessage.contains('User already registered')) {
-          errorMessage =
-              'An account with this email already exists. Please sign in or use a different email.';
-          print('👤 [REGISTER] User already exists error detected');
-        } else if (errorMessage.contains('Invalid email')) {
-          errorMessage = 'Please enter a valid email address.';
-          print('📧 [REGISTER] Invalid email error detected');
-        } else if (errorMessage.contains('Password should be at least')) {
-          errorMessage = 'Password must be at least 6 characters long.';
-          print('🔒 [REGISTER] Password too short error detected');
-        } else if (errorMessage.contains('rate limit')) {
-          errorMessage = 'Too many signup attempts. Please try again later.';
-          print('⏰ [REGISTER] Rate limit error detected');
-        } else if (errorMessage.contains('unexpected failure')) {
-          errorMessage =
-              'A temporary service issue occurred. Please try again in a few minutes.';
-          print('🔧 [REGISTER] Service failure error detected');
-        }
-
-        print('❌ [REGISTER] Final error message: $errorMessage');
+        // FirebaseAuthProvider already maps common errors; just show the message
         EasyLoadingConfig.showError(errorMessage);
       }
     } finally {
@@ -135,7 +104,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             color:
                 isDark ? AppColors.darkForeground : AppColors.lightForeground,
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const WelcomeScreen(),
+              ),
+            )
+          }
         ),
       ),
       body: SafeArea(
@@ -175,6 +150,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
 
                 const SizedBox(height: 40),
+
+                // Username Field (required)
+                TextFormField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    hintText: 'Enter your username',
+                    prefixIcon: Icon(
+                      Icons.person_outline,
+                      color: isDark
+                          ? AppColors.darkMutedForeground
+                          : AppColors.lightMutedForeground,
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a username';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 24),
 
                 // Email Field
                 TextFormField(

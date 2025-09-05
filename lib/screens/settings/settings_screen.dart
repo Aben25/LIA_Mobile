@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:love_in_action/screens/auth/login_screen.dart';
+import 'package:love_in_action/screens/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/supabase_provider.dart';
+import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
 
@@ -21,6 +24,30 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
+  Future<void> _handleSignOut(BuildContext context) async {
+    try {
+      EasyLoadingConfig.showLoading();
+
+      final strapiProvider =
+      Provider.of<StrapiAuthProvider>(context, listen: false);
+      await strapiProvider.logout();
+
+      EasyLoadingConfig.dismiss();
+      EasyLoadingConfig.showToast('Signed out successfully');
+
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+              (route) => false,
+        );
+      }
+    } catch (error) {
+      EasyLoadingConfig.dismiss();
+      EasyLoadingConfig.showError('Failed to sign out');
+    }
+  }
 
   @override
   void initState() {
@@ -36,6 +63,11 @@ class _SettingsScreenState extends State<SettingsScreen>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    final strapiProvider =
+        Provider.of<StrapiAuthProvider>(context, listen: false);
+    strapiProvider.getUser();
+    });
   }
 
   @override
@@ -124,8 +156,10 @@ class _SettingsScreenState extends State<SettingsScreen>
         EasyLoadingConfig.dismiss();
         EasyLoadingConfig.showToast('Account deleted successfully');
 
-        // Sign out and navigate to welcome screen
-        await supabaseProvider.signOut();
+        // Log out from Strapi and navigate to welcome screen
+        final strapiProvider =
+            Provider.of<StrapiAuthProvider>(context, listen: false);
+        await strapiProvider.logout();
 
         if (mounted) {
           Navigator.of(context).pushNamedAndRemoveUntil(
@@ -230,8 +264,12 @@ class _SettingsScreenState extends State<SettingsScreen>
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final supabaseProvider = Provider.of<SupabaseProvider>(context);
+    final strapiProvider = Provider.of<StrapiAuthProvider>(context);
     final isDark = themeProvider.isDarkMode;
-    final user = supabaseProvider.user;
+    final user = strapiProvider.user;
+    print('user: $user');
+
+
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -267,61 +305,66 @@ class _SettingsScreenState extends State<SettingsScreen>
               child: Column(
                 children: [
                   // Profile Section
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: (isDark
-                              ? AppColors.darkBackground
-                              : AppColors.lightBackground)
-                          .withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(24),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (_) =>  ProfileScreen()));
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: (isDark
+                                ? AppColors.darkBackground
+                                : AppColors.lightBackground)
+                            .withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Icon(
+                              Icons.person,
+                              size: 24,
+                              color: AppColors.primary,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.person,
-                            size: 24,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Profile',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark
-                                      ? AppColors.darkForeground
-                                      : AppColors.lightForeground,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Profile',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark
+                                        ? AppColors.darkForeground
+                                        : AppColors.lightForeground,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                user?.email ?? 'Unknown',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  color: isDark
-                                      ? AppColors.darkMutedForeground
-                                      : AppColors.lightMutedForeground,
+                                Text(
+                                  '${user?.email}',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 14,
+                                    color: isDark
+                                        ? AppColors.darkMutedForeground
+                                        : AppColors.lightMutedForeground,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
 
@@ -496,7 +539,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: InkWell(
-                          onTap: () => _handleDeleteAccount(context),
+                          onTap: () {
+                            EasyLoadingConfig.showToast('Coming soon');
+                          },
+                          // onTap: () => _handleDeleteAccount(context),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Row(
@@ -554,23 +600,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
-                        try {
-                          EasyLoadingConfig.showLoading();
-                          await supabaseProvider.signOut();
-                          EasyLoadingConfig.dismiss();
-                          EasyLoadingConfig.showToast(
-                              'Signed out successfully');
-
-                          if (mounted) {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                              '/welcome',
-                              (route) => false,
-                            );
-                          }
-                        } catch (error) {
-                          EasyLoadingConfig.dismiss();
-                          EasyLoadingConfig.showError('Failed to sign out');
-                        }
+                        _handleSignOut(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red[400],

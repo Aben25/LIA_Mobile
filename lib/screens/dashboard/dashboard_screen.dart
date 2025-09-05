@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/supabase_provider.dart';
+import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
 import '../children/children_detail_screen.dart';
+import '../../services/dashboard_service.dart';
+import '../../models/child.dart';
+import '../../constants/api_endpoints.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -14,7 +17,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  List<Map<String, dynamic>> _sponsees = [];
+  final DashboardService _service = DashboardService();
+  List<Child> _children = [];
   bool _loading = true;
   bool _refreshing = false;
   String? _error;
@@ -22,10 +26,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchSponsoredChildren();
+    _fetchChildren();
   }
 
-  Future<void> _fetchSponsoredChildren() async {
+  Future<void> _fetchChildren() async {
     if (!mounted) return;
 
     try {
@@ -34,90 +38,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _error = null;
       });
 
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
-      final user = supabaseProvider.user;
-
-      if (user == null) {
+      final auth = Provider.of<StrapiAuthProvider>(context, listen: false);
+      final jwt = auth.jwt;
+      if (jwt == null || jwt.isEmpty) {
         throw Exception('User not authenticated');
       }
 
-      print(
-          '🔍 [DASHBOARD] Fetching sponsored children for user: ${user.email}');
-
-      // Step 1: Get sponsor ID from user email
-      final sponsorResult = await supabaseProvider.supabase
-          .from("sponsors")
-          .select("id")
-          .eq("email", user.email ?? '')
-          .maybeSingle(); // Use maybeSingle() instead of single() to handle no results
-
-      if (sponsorResult == null) {
-        // User exists but no sponsor record found - this is normal for new users
-        print('🔍 [DASHBOARD] No sponsor record found for user: ${user.email}');
-        print(
-            '🔍 [DASHBOARD] This is normal for new users - sponsor record needs to be created');
-
-        setState(() {
-          _sponsees = [];
-          _loading = false;
-        });
-        return;
-      }
-
-      print(
-          '🔍 [DASHBOARD] Found sponsor record with ID: ${sponsorResult['id']}');
-
-      final sponsorId = sponsorResult['id'] as int;
-
-      // Step 2: Get sponsee relationships
-      final relResult = await supabaseProvider.supabase
-          .from("sponsors_rels")
-          .select("sponsees_id")
-          .eq("parent_id", sponsorId);
-
-      if (relResult == null) {
-        setState(() {
-          _sponsees = [];
-          _loading = false;
-        });
-        return;
-      }
-
-      final sponseeIds = relResult
-          .map((rel) => rel['sponsees_id'] as int?)
-          .where((id) => id != null)
-          .cast<int>()
-          .toList();
-
-      if (sponseeIds.isEmpty) {
-        print(
-            '🔍 [DASHBOARD] No sponsee relationships found for sponsor ID: $sponsorId');
-        setState(() {
-          _sponsees = [];
-          _loading = false;
-        });
-        return;
-      }
-
-      print('🔍 [DASHBOARD] Found ${sponseeIds.length} sponsee relationships');
-
-      // Step 3: Get sponsee details with profile pictures
-      final sponseesResult =
-          await supabaseProvider.supabase.from("sponsees").select('''
-            *,
-            media:profile_picture_id (
-              filename,
-              url
-            )
-          ''').inFilter("id", sponseeIds);
-
-      if (sponseesResult == null) {
-        throw Exception('Error fetching sponsees');
-      }
+      final children = await _service.getChildrenForUser(jwt: jwt);
 
       setState(() {
-        _sponsees = sponseesResult ?? [];
+        _children = children;
         _loading = false;
       });
     } catch (error) {
@@ -136,7 +66,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _refreshing = true;
     });
 
-    await _fetchSponsoredChildren();
+    await _fetchChildren();
 
     if (mounted) {
       setState(() {
@@ -196,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildSponseeCard(Map<String, dynamic> sponsee) {
+  Widget _buildChildCard(Child child) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
 
@@ -205,7 +135,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ChildrenDetailScreen(
-              childId: sponsee['id'].toString(),
+              childId: child.id.toString(),
             ),
           ),
         );
@@ -241,27 +171,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(40),
                 ),
-                child: sponsee['media'] != null &&
-                        sponsee['media']['filename'] != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(40),
-                        child: Image.network(
-                          'https://ntckmekstkqxqgigqzgn.supabase.co/storage/v1/object/public/Media/${sponsee['media']['filename']}',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.person,
-                              size: 40,
-                              color: AppColors.primary,
-                            );
-                          },
-                        ),
-                      )
-                    : Icon(
+                child: Builder(
+                  builder: (context) {
+                    final url = child.firstImageUrl;
+                    if (url == null || url.isEmpty) {
+                      return Icon(
                         Icons.person,
                         size: 40,
                         color: AppColors.primary,
+                      );
+                    }
+                    // If URL is relative, prefix with Strapi base (without /api)
+                    final absoluteUrl = url.startsWith('http')
+                        ? url
+                        : ApiEndpoints.baseUrl.replaceFirst('/api', '') + url;
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: Image.network(
+                        absoluteUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.person,
+                            size: 40,
+                            color: AppColors.primary,
+                          );
+                        },
                       ),
+                    );
+                  },
+                ),
               ),
 
               const SizedBox(width: 20),
@@ -272,7 +211,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      sponsee['full_name'] ?? 'Unknown Name',
+                      child.fullName ?? 'Unknown Name',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 20,
@@ -284,7 +223,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${_calculateAge(sponsee['date_of_birth'])} years old • ${sponsee['location'] ?? 'Unknown Location'}',
+                      '${_calculateAge(child.dateOfBirth?.toIso8601String())} years old • ${child.location ?? 'Unknown Location'}',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
@@ -295,9 +234,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      sponsee['about'] ??
-                          sponsee['aspiration'] ??
-                          'No description available',
+                      child.about ?? child.aspiration ?? 'No description available',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
@@ -512,7 +449,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: _fetchSponsoredChildren,
+              onPressed: _fetchChildren,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -561,7 +498,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               hasScrollBody: false,
               child: _buildErrorState(),
             )
-          else if (_sponsees.isEmpty)
+          else if (_children.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
               child: _buildEmptyState(),
@@ -569,8 +506,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           else
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildSponseeCard(_sponsees[index]),
-                childCount: _sponsees.length,
+                (context, index) => _buildChildCard(_children[index]),
+                childCount: _children.length,
               ),
             ),
         ],

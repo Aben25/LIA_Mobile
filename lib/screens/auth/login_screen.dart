@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:love_in_action/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/supabase_provider.dart';
+import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import '../main_app_screen.dart';
+import 'verification_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,9 +36,9 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       EasyLoadingConfig.showLoading();
 
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
-      await supabaseProvider.signInWithPassword(
+      final strapiAuthProvider =
+          Provider.of<StrapiAuthProvider>(context, listen: false);
+      await strapiAuthProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
@@ -44,7 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         EasyLoadingConfig.dismiss();
         EasyLoadingConfig.showToast('Login successful!');
-        // Navigate to main app
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const MainAppScreen(),
@@ -76,7 +77,11 @@ class _LoginScreenState extends State<LoginScreen> {
             color:
                 isDark ? AppColors.darkForeground : AppColors.lightForeground,
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const WelcomeScreen(),
+            ),
+          ),
         ),
       ),
       body: SafeArea(
@@ -117,13 +122,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 40),
 
-                // Email Field
+                // Identifier Field (Email or Username)
                 TextFormField(
                   controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
+                    labelText: 'Email or Username',
+                    hintText: 'Enter your email or username',
                     prefixIcon: Icon(
                       Icons.email_outlined,
                       color: isDark
@@ -132,12 +137,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                        .hasMatch(value)) {
-                      return 'Please enter a valid email';
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your email or username';
                     }
                     return null;
                   },

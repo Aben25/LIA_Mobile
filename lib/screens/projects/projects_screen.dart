@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/supabase_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
 import 'project_detail_screen.dart';
+import '../../services/projects_service.dart';
+import '../../models/cause.dart';
 
 class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
@@ -14,7 +15,8 @@ class ProjectsScreen extends StatefulWidget {
 }
 
 class _ProjectsScreenState extends State<ProjectsScreen> {
-  List<Map<String, dynamic>> _projects = [];
+  final ProjectsService _service = ProjectsService();
+  List<Cause> _projects = [];
   bool _loading = true;
   bool _refreshing = false;
   String? _error;
@@ -33,32 +35,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         _loading = true;
         _error = null;
       });
-
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
-
-      print('🔍 [PROJECTS] Fetching projects...');
-
-      final projectsResult =
-          await supabaseProvider.supabase.from("projects").select('''
-            *,
-            media:project_profile_picture_id (
-              filename,
-              url
-            )
-          ''');
-
-      if (projectsResult == null) {
-        throw Exception('Error fetching projects');
-      }
-
-      // Log the first project to debug image issues
-      if (projectsResult.isNotEmpty) {
-        print('🔍 [PROJECTS] First project data: ${projectsResult.first}');
-      }
-
-      print('🔍 [PROJECTS] Found ${projectsResult.length} projects');
-
+      print('🔍 [PROJECTS] Fetching causes from Strapi...');
+      final projectsResult = await _service.getCauses();
+      print('🔍 [PROJECTS] Found ${projectsResult.length} causes');
       setState(() {
         _projects = projectsResult;
         _loading = false;
@@ -98,13 +77,13 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     );
   }
 
-  Widget _buildProjectCard(Map<String, dynamic> project) {
+  Widget _buildProjectCard(Cause project) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
 
-    final imageUrl = project['media']?['filename'] != null
-        ? 'https://ntckmekstkqxqgigqzgn.supabase.co/storage/v1/object/public/Media/${project['media']['filename']}'
-        : null;
+    // Causes do not currently have an image field defined in the shared sample.
+    // Keep placeholder image for now.
+    final String? imageUrl = null;
 
     return Container(
       width: double.infinity,
@@ -127,7 +106,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         ],
       ),
       child: InkWell(
-        onTap: () => _navigateToProjectDetails(project['id']),
+        onTap: () {
+          EasyLoadingConfig.showToast('Coming soon');
+        },
         borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +177,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      project['project_type'] ?? 'Unknown Type',
+                      project.category ?? 'General',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
@@ -208,7 +189,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
 
                   // Project Title
                   Text(
-                    project['project_title'] ?? 'Untitled Project',
+                    project.title,
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 18,
@@ -223,7 +204,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
 
                   // Project Goal
                   Text(
-                    project['goal'] ?? 'No description available',
+                    project.description ?? 'No description available',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
@@ -254,7 +235,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Impact:',
+                          'Category:',
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 16,
@@ -266,8 +247,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          project['impact'] ??
-                              'No impact information available',
+                          project.category ?? 'General',
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 16,

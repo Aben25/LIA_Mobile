@@ -7,6 +7,9 @@ import '../models/project.dart';
 import '../utils/easy_loading_config.dart';
 import 'auth/login_screen.dart';
 import 'projects/project_detail_screen.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../services/projects_service.dart';
 
 class GuestProjectsScreen extends StatefulWidget {
   const GuestProjectsScreen({super.key});
@@ -16,49 +19,39 @@ class GuestProjectsScreen extends StatefulWidget {
 }
 
 class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
-  List<Map<String, dynamic>> _projects = [];
+  List<Project> _projects = [];
   bool _loading = true;
   bool _refreshing = false;
   String? _error;
+  late final ProjectsService _projectsService;
 
   @override
   void initState() {
     super.initState();
+    _projectsService = ProjectsService();
     _loadProjects();
   }
 
   Future<void> _loadProjects() async {
     if (!mounted) return;
-
     try {
       setState(() {
         _loading = true;
         _error = null;
       });
-
-      print('🔍 [GUEST] Loading projects...');
-
-      // Fetch projects from Supabase (public access)
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
-      final projects = await supabaseProvider.fetchProjects();
-
+      print('🔍 [GUEST] Loading projects from ProjectsService...');
+      final projects = await _projectsService.getProjects();
       if (mounted) {
         setState(() {
           _projects = projects;
           _loading = false;
         });
       }
-
-      print('🔍 [GUEST] Loaded ${_projects.length} projects');
-    } catch (error) {
-      if (mounted) {
-        setState(() {
-          _error = error.toString();
-          _loading = false;
-        });
-        EasyLoadingConfig.showError('Failed to load projects');
-      }
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
     }
   }
 
@@ -94,15 +87,9 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
     );
   }
 
-  Widget _buildProjectCard(Map<String, dynamic> project) {
+  Widget _buildProjectCard(Project project) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
-
-    final projectTitle = project['project_title'] ?? 'Untitled Project';
-    final goal = project['goal'];
-    final impact = project['impact'];
-    final projectType = project['project_type'] ?? 'Project';
-
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
       decoration: BoxDecoration(
@@ -123,14 +110,17 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
         ],
       ),
       child: InkWell(
-        onTap: () => _navigateToProjectDetails(project['id'].toString()),
+          onTap: () {
+            EasyLoadingConfig.showToast('Coming soon');
+          },
+        // onTap: () => _navigateToProjectDetails(project.documentId),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Project Type Badge
+              // Category Badge
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -139,7 +129,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  projectType,
+                  '${project.category}',
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 12,
@@ -148,12 +138,10 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
-
               // Project Title
               Text(
-                projectTitle,
+                project.title,
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 20,
@@ -165,74 +153,20 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-
               const SizedBox(height: 12),
-
-              // Goal
-              if (goal != null && goal.isNotEmpty)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Goal:',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? AppColors.darkMutedForeground
-                            : AppColors.lightMutedForeground,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      goal,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        color: isDark
-                            ? AppColors.darkMutedForeground
-                            : AppColors.lightMutedForeground,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+              // Description
+              Text(
+                project.description,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  color: isDark
+                      ? AppColors.darkMutedForeground
+                      : AppColors.lightMutedForeground,
                 ),
-
-              // Impact
-              if (impact != null && impact.isNotEmpty)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Impact:',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? AppColors.darkMutedForeground
-                            : AppColors.lightMutedForeground,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      impact,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        color: isDark
-                            ? AppColors.darkMutedForeground
-                            : AppColors.lightMutedForeground,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
               const SizedBox(height: 16),
 
               // Sign in prompt

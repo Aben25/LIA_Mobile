@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "268117518809",
+    "project_id": "liamobile-59365",
+    "storage_bucket": "liamobile-59365.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:268117518809:android:8928f4f54d019627c1d1c8",
+        "android_client_info": {
+          "package_name": "com.ben25.loveinaction2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdpCMJfwKk9sYPZnaarTkwQvdLxpTHiyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:268117518809:android:fab7f89bf68dcbf5c1d1c8",
+        "android_client_info": {
+          "package_name": "com.example.love_in_action"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdpCMJfwKk9sYPZnaarTkwQvdLxpTHiyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

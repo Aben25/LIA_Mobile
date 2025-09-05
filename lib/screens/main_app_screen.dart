@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
-import '../providers/supabase_provider.dart';
+import '../providers/strapi_auth_provider.dart';
 import '../constants/app_colors.dart';
 import '../utils/easy_loading_config.dart';
 import 'dashboard/dashboard_screen.dart';
@@ -11,7 +11,9 @@ import 'projects/projects_screen.dart';
 import 'donations/donations_screen.dart';
 
 class MainAppScreen extends StatefulWidget {
-  const MainAppScreen({super.key});
+  final int initialIndex;
+
+  const MainAppScreen({super.key, this.initialIndex = 0});
 
   @override
   State<MainAppScreen> createState() => _MainAppScreenState();
@@ -31,9 +33,9 @@ class _MainAppScreenState extends State<MainAppScreen> {
     try {
       EasyLoadingConfig.showLoading();
 
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
-      await supabaseProvider.signOut();
+      final strapiProvider =
+          Provider.of<StrapiAuthProvider>(context, listen: false);
+      await strapiProvider.logout();
 
       EasyLoadingConfig.dismiss();
       EasyLoadingConfig.showToast('Signed out successfully');
@@ -53,9 +55,17 @@ class _MainAppScreenState extends State<MainAppScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
+    final auth = Provider.of<StrapiAuthProvider>(context);
+    final isAuthenticated = auth.isAuthenticated;
 
     return Scaffold(
       backgroundColor:
@@ -75,14 +85,16 @@ class _MainAppScreenState extends State<MainAppScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: Icon(
-              Icons.logout,
-              color:
-                  isDark ? AppColors.darkForeground : AppColors.lightForeground,
+          if (isAuthenticated)
+            IconButton(
+              icon: Icon(
+                Icons.logout,
+                color: isDark
+                    ? AppColors.darkForeground
+                    : AppColors.lightForeground,
+              ),
+              onPressed: () => _handleSignOut(context),
             ),
-            onPressed: () => _handleSignOut(context),
-          ),
         ],
       ),
       body: _screens[_currentIndex],
