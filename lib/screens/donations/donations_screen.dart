@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/supabase_provider.dart';
+import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
 import '../../services/google_sheets_service.dart';
@@ -35,8 +35,9 @@ class _DonationsScreenState extends State<DonationsScreen> {
         _error = null;
       });
 
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
+      // Commented out during Strapi transition
+      // final supabaseProvider =
+      //     Provider.of<SupabaseProvider>(context, listen: false);
 
       print('🔍 [DONATIONS] Loading donations...');
 
@@ -44,7 +45,9 @@ class _DonationsScreenState extends State<DonationsScreen> {
       final allDonations = await GoogleSheetsService.fetchDonations();
 
       // Filter donations for the current user
-      final userEmail = supabaseProvider.user?.email;
+      final strapiProvider =
+          Provider.of<StrapiAuthProvider>(context, listen: false);
+      final userEmail = strapiProvider.user?.email;
       if (userEmail != null) {
         final userEmailLower = userEmail.toLowerCase().trim();
         final username = userEmailLower.split('@')[0];

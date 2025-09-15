@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/strapi_auth_provider.dart';
 import '../constants/app_colors.dart';
-import '../utils/easy_loading_config.dart';
+import '../utils/app_messaging.dart';
 import 'dashboard/dashboard_screen.dart';
 import 'auth/login_screen.dart';
 import 'settings/settings_screen.dart';
@@ -31,14 +31,14 @@ class _MainAppScreenState extends State<MainAppScreen> {
 
   Future<void> _handleSignOut(BuildContext context) async {
     try {
-      EasyLoadingConfig.showLoading();
+      AppMessaging.showLoading('Signing you out...');
 
       final strapiProvider =
           Provider.of<StrapiAuthProvider>(context, listen: false);
       await strapiProvider.logout();
 
-      EasyLoadingConfig.dismiss();
-      EasyLoadingConfig.showToast('Signed out successfully');
+      AppMessaging.dismiss();
+      AppMessaging.showSuccess('Signed out successfully');
 
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
@@ -49,8 +49,8 @@ class _MainAppScreenState extends State<MainAppScreen> {
         );
       }
     } catch (error) {
-      EasyLoadingConfig.dismiss();
-      EasyLoadingConfig.showError('Failed to sign out');
+      AppMessaging.dismiss();
+      AppMessaging.showError('Failed to sign out');
     }
   }
 

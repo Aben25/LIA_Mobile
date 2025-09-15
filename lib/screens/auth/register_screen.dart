@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
-import '../../utils/easy_loading_config.dart';
+import '../../utils/app_messaging.dart';
+import '../../utils/password_validator.dart';
+import '../../widgets/password_strength_indicator.dart';
 import 'login_screen.dart';
 import '../main_app_screen.dart';
 
@@ -24,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  PasswordValidationResult? _passwordValidation;
 
   @override
   void dispose() {
@@ -34,15 +37,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  void _validatePassword(String password) {
+    setState(() {
+      _passwordValidation = PasswordValidator.validatePassword(password);
+    });
+  }
+
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Additional password validation
+    final passwordValidation =
+        PasswordValidator.validatePassword(_passwordController.text);
+    if (!passwordValidation.isValid) {
+      AppMessaging.showError(
+          'Please fix password requirements before continuing');
+      return;
+    }
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      EasyLoadingConfig.showLoading();
+      AppMessaging.showLoading('Creating your account...');
 
       final strapiAuthProvider =
           Provider.of<StrapiAuthProvider>(context, listen: false);
@@ -53,10 +71,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (mounted) {
-        EasyLoadingConfig.dismiss();
-        final hasToken = strapiAuthProvider.jwt != null && strapiAuthProvider.jwt!.isNotEmpty;
+        AppMessaging.dismiss();
+        final hasToken = strapiAuthProvider.jwt != null &&
+            strapiAuthProvider.jwt!.isNotEmpty;
         if (hasToken) {
-          EasyLoadingConfig.showToast('Account created! Logged in successfully.');
+          AppMessaging.showSuccess('Account created! Logged in successfully.');
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => const MainAppScreen(),
@@ -64,7 +83,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           );
         } else {
           // Email confirmation enabled: no JWT until email is confirmed
-          EasyLoadingConfig.showToast('Account created! Please check your email to confirm your account before signing in.');
+          AppMessaging.showInfo(
+              'Account created! Please check your email to confirm your account before signing in.');
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => const LoginScreen(),
@@ -76,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (mounted) {
         String errorMessage = error.toString().replaceAll('Exception: ', '');
         // FirebaseAuthProvider already maps common errors; just show the message
-        EasyLoadingConfig.showError(errorMessage);
+        AppMessaging.showError(errorMessage);
       }
     } finally {
       if (mounted) {
@@ -99,19 +119,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color:
-                isDark ? AppColors.darkForeground : AppColors.lightForeground,
-          ),
-          onPressed: () => {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const WelcomeScreen(),
-              ),
-            )
-          }
-        ),
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color:
+                  isDark ? AppColors.darkForeground : AppColors.lightForeground,
+            ),
+            onPressed: () => {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const WelcomeScreen(),
+                    ),
+                  )
+                }),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -150,6 +169,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
 
                 const SizedBox(height: 40),
+
+                // Password Policy Info
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          PasswordValidator.getPasswordPolicyDescription(),
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
 
                 // Username Field (required)
                 TextFormField(
@@ -206,9 +261,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  onChanged: _validatePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    hintText: 'Minimum 6 characters',
+                    hintText: 'Enter a strong password',
                     prefixIcon: Icon(
                       Icons.lock_outlined,
                       color: isDark
@@ -230,17 +286,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         });
                       },
                     ),
+                    errorText: null, // We'll use AppErrorMessage widget instead
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a password';
                     }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                    final validation =
+                        PasswordValidator.validatePassword(value);
+                    if (!validation.isValid) {
+                      return validation.primaryError;
                     }
                     return null;
                   },
                 ),
+
+                // Password Error Message
+                AppErrorMessage(
+                  message: _passwordValidation?.isValid == false
+                      ? _passwordValidation?.primaryError
+                      : null,
+                  isVisible: _passwordValidation?.isValid == false,
+                ),
+
+                // Password Strength Indicator
+                if (_passwordValidation != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: PasswordStrengthIndicator(
+                      password: _passwordController.text,
+                      validationResult: _passwordValidation,
+                    ),
+                  ),
 
                 const SizedBox(height: 24),
 

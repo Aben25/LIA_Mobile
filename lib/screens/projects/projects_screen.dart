@@ -67,15 +67,16 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     }
   }
 
-  void _navigateToProjectDetails(int projectId) {
+  void _navigateToProjectDetails(Cause project) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ProjectDetailScreen(
-          projectId: projectId.toString(),
+          project: project,
         ),
       ),
     );
   }
+
 
   Widget _buildProjectCard(Cause project) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -83,7 +84,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
 
     // Causes do not currently have an image field defined in the shared sample.
     // Keep placeholder image for now.
-    final String? imageUrl = null;
+    final String? imageUrl = project.image?.url != null ? project.image?.url : null;
+    print('🔍 [PROJECTS] Image URL: $imageUrl');
 
     return Container(
       width: double.infinity,
@@ -107,7 +109,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       ),
       child: InkWell(
         onTap: () {
-          EasyLoadingConfig.showToast('Coming soon');
+          _navigateToProjectDetails(project);
+          // EasyLoadingConfig.showToast('Coming soon');
         },
         borderRadius: BorderRadius.circular(12),
         child: Column(

@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
-import '../providers/supabase_provider.dart';
 import '../constants/app_colors.dart';
-import '../models/project.dart';
-import '../utils/easy_loading_config.dart';
+import '../models/cause.dart';
 import 'auth/login_screen.dart';
 import 'projects/project_detail_screen.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../services/projects_service.dart';
 
 class GuestProjectsScreen extends StatefulWidget {
@@ -19,7 +15,7 @@ class GuestProjectsScreen extends StatefulWidget {
 }
 
 class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
-  List<Project> _projects = [];
+  List<Cause> _projects = [];
   bool _loading = true;
   bool _refreshing = false;
   String? _error;
@@ -40,7 +36,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
         _error = null;
       });
       print('🔍 [GUEST] Loading projects from ProjectsService...');
-      final projects = await _projectsService.getProjects();
+      final projects = await _projectsService.getCauses();
       if (mounted) {
         setState(() {
           _projects = projects;
@@ -69,11 +65,11 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
     }
   }
 
-  void _navigateToProjectDetails(String projectId) {
+  void _navigateToProjectDetails(Cause project) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ProjectDetailScreen(
-          projectId: projectId,
+          project: project,
         ),
       ),
     );
@@ -87,7 +83,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
     );
   }
 
-  Widget _buildProjectCard(Project project) {
+  Widget _buildProjectCard(Cause project) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
     return Container(
@@ -110,10 +106,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
         ],
       ),
       child: InkWell(
-          onTap: () {
-            EasyLoadingConfig.showToast('Coming soon');
-          },
-        // onTap: () => _navigateToProjectDetails(project.documentId),
+        onTap: () => _navigateToProjectDetails(project),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -129,7 +122,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${project.category}',
+                  '${project.category ?? 'General'}',
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 12,
@@ -156,7 +149,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
               const SizedBox(height: 12),
               // Description
               Text(
-                project.description,
+                project.description ?? 'No description available',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,

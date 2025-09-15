@@ -4,11 +4,10 @@ import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
-import '../../utils/easy_loading_config.dart';
+import '../../utils/app_messaging.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import '../main_app_screen.dart';
-import 'verification_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      EasyLoadingConfig.showLoading();
+      AppMessaging.showLoading('Signing you in...');
 
       final strapiAuthProvider =
           Provider.of<StrapiAuthProvider>(context, listen: false);
@@ -44,8 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (mounted) {
-        EasyLoadingConfig.dismiss();
-        EasyLoadingConfig.showToast('Login successful!');
+        AppMessaging.dismiss();
+        AppMessaging.showSuccess('Login successful!');
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const MainAppScreen(),
@@ -55,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (error) {
       if (mounted) {
         String errorMessage = error.toString().replaceAll('Exception: ', '');
-        EasyLoadingConfig.showError(errorMessage);
+        AppMessaging.showError(errorMessage);
       }
     }
   }

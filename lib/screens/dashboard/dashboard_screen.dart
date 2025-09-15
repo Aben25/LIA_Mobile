@@ -234,7 +234,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      child.about ?? child.aspiration ?? 'No description available',
+                      child.about ??
+                          child.aspiration ??
+                          'No description available',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,

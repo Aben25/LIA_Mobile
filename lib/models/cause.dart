@@ -1,15 +1,16 @@
-import 'package:flutter/foundation.dart';
-
 class Cause {
-  final int? id;
-  final String? documentId;
+  final int id;
+  final String documentId;
   final String title;
   final String? description;
   final String? category;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-  final DateTime? publishedAt;
   final bool? hasDetails;
+  final CauseImage? image;
+  final BlogLink? blogLink;
+  final CauseLink? link;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime publishedAt;
 
   Cause({
     required this.id,
@@ -17,48 +18,119 @@ class Cause {
     required this.title,
     this.description,
     this.category,
-    this.createdAt,
-    this.updatedAt,
-    this.publishedAt,
     this.hasDetails,
+    this.image,
+    this.blogLink,
+    this.link,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.publishedAt,
   });
 
   factory Cause.fromJson(Map<String, dynamic> json) {
-    // Supports Strapi v4 default shape and flat shape
-    if (json.containsKey('attributes')) {
-      final attrs = json['attributes'] as Map<String, dynamic>;
-      return Cause(
-        id: (json['id'] as num?)?.toInt(),
-        documentId: attrs['documentId'] as String?,
-        title: (attrs['title'] ?? '') as String,
-        description: attrs['description'] as String?,
-        category: attrs['category'] as String?,
-        createdAt: _parseDate(attrs['createdAt']),
-        updatedAt: _parseDate(attrs['updatedAt']),
-        publishedAt: _parseDate(attrs['publishedAt']),
-        hasDetails: attrs['hasDetails'] as bool?,
-      );
-    }
-
     return Cause(
-      id: (json['id'] as num?)?.toInt(),
-      documentId: json['documentId'] as String?,
-      title: (json['title'] ?? '') as String,
-      description: json['description'] as String?,
-      category: json['category'] as String?,
-      createdAt: _parseDate(json['createdAt']),
-      updatedAt: _parseDate(json['updatedAt']),
-      publishedAt: _parseDate(json['publishedAt']),
-      hasDetails: json['hasDetails'] as bool?,
+      id: json['id'],
+      documentId: json['documentId'],
+      title: json['title'] ?? '',
+      description: json['description'],
+      category: json['category'],
+      hasDetails: json['hasDetails'],
+      image: json['image'] != null ? CauseImage.fromJson(json['image']) : null,
+      blogLink: json['blogLink'] != null ? BlogLink.fromJson(json['blogLink']) : null,
+      link: json['link'] != null ? CauseLink.fromJson(json['link']) : null,
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+      publishedAt: DateTime.parse(json['publishedAt']),
     );
   }
+}
 
-  static DateTime? _parseDate(dynamic v) {
-    if (v == null) return null;
-    try {
-      return DateTime.parse(v as String);
-    } catch (_) {
-      return null;
-    }
+class CauseImage {
+  final String? url;
+  final String? name;
+  final String? alternativeText;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  CauseImage({
+    this.url,
+    this.name,
+    this.alternativeText,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory CauseImage.fromJson(Map<String, dynamic> json) {
+    return CauseImage(
+      url: json['url'],
+      name: json['name'],
+      alternativeText: json['alternativeText'],
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
+    );
+  }
+}
+
+class BlogLink {
+  final int id;
+  final String? heading;
+  final String? subHeading;
+  final List<Map<String, dynamic>>? body;
+  final CauseImage? cover;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? publishedAt;
+
+  BlogLink({
+    required this.id,
+    this.heading,
+    this.subHeading,
+    this.body,
+    this.cover,
+    this.createdAt,
+    this.updatedAt,
+    this.publishedAt,
+  });
+
+  factory BlogLink.fromJson(Map<String, dynamic> json) {
+    return BlogLink(
+      id: json['id'],
+      heading: json['heading'],
+      subHeading: json['subHeading'],
+      body: json['body'] != null ? List<Map<String, dynamic>>.from(json['body']) : null,
+      cover: json['cover'] != null ? CauseImage.fromJson(json['cover']) : null,
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
+      publishedAt: json['publishedAt'] != null ? DateTime.tryParse(json['publishedAt']) : null,
+    );
+  }
+}
+
+class CauseLink {
+  final int id;
+  final String? label;
+  final String? url;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? publishedAt;
+
+  CauseLink({
+    required this.id,
+    this.label,
+    this.url,
+    this.createdAt,
+    this.updatedAt,
+    this.publishedAt,
+  });
+
+  factory CauseLink.fromJson(Map<String, dynamic> json) {
+    return CauseLink(
+      id: json['id'],
+      label: json['label'],
+      url: json['url'],
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
+      publishedAt: json['publishedAt'] != null ? DateTime.tryParse(json['publishedAt']) : null,
+    );
   }
 }

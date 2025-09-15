@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/supabase_provider.dart';
+import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
-import '../../utils/easy_loading_config.dart';
+import '../../utils/app_messaging.dart';
 import 'login_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -46,15 +46,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
 
     try {
-      EasyLoadingConfig.showLoading();
+      AppMessaging.showLoading('Sending reset instructions...');
 
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
+      final strapiAuthProvider =
+          Provider.of<StrapiAuthProvider>(context, listen: false);
 
-      await supabaseProvider.resetPassword(_emailController.text.trim());
+      await strapiAuthProvider.forgotPassword(_emailController.text.trim());
 
-      EasyLoadingConfig.dismiss();
-      EasyLoadingConfig.showToast('Reset instructions sent!');
+      AppMessaging.dismiss();
+      AppMessaging.showSuccess('Reset instructions sent!');
 
       setState(() {
         _isSubmitted = true;
@@ -62,7 +62,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
       // Success is handled in the UI rather than an alert for better UX
     } catch (error) {
-      EasyLoadingConfig.dismiss();
+      AppMessaging.dismiss();
 
       // Even if the email doesn't exist, we don't want to reveal that for security reasons
       // Just show a generic success message

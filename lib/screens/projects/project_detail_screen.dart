@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:love_in_action/models/cause.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/supabase_provider.dart';
 import '../../constants/app_colors.dart';
-import '../../utils/easy_loading_config.dart';
+import '../../utils/app_messaging.dart';
 import '../../components/webview_donation.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
-  final String projectId;
+  final Cause project;
 
   const ProjectDetailScreen({
     super.key,
-    required this.projectId,
+    required this.project,
   });
 
   @override
@@ -19,85 +20,84 @@ class ProjectDetailScreen extends StatefulWidget {
 }
 
 class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
-  Map<String, dynamic>? _project;
   bool _loading = true;
   String? _error;
   bool _showDonationWebView = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchProjectDetails();
-  }
-
-  Future<void> _fetchProjectDetails() async {
-    if (!mounted) return;
-
-    try {
-      setState(() {
-        _loading = true;
-        _error = null;
-      });
-
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
-      final supabase = supabaseProvider.supabase;
-
-      print(
-          '🔍 [PROJECT] Fetching project details for ID: ${widget.projectId}');
-
-      final response = await supabase.from('projects').select('''
-            *,
-            media:project_profile_picture_id (
-              filename,
-              url
-            )
-          ''').eq('id', widget.projectId).single();
-
-      if (mounted) {
-        setState(() {
-          _project = response;
-          _loading = false;
-        });
-      }
-
-      // Fetch gallery media if gallery_id exists
-      if (_project != null && _project!['gallery_id'] != null) {
-        try {
-          final galleryResponse =
-              await supabase.from('gallery_media').select('''
-                id,
-                image_id,
-                caption,
-                media_type,
-                media:image_id (
-                  filename,
-                  url
-                )
-              ''').eq('_parent_id', _project!['gallery_id']);
-
-          if (mounted && galleryResponse != null) {
-            setState(() {
-              _project!['gallery_media'] = galleryResponse;
-            });
-          }
-        } catch (galleryError) {
-          print('🔍 [PROJECT] Error fetching gallery: $galleryError');
-        }
-      }
-
-      print('🔍 [PROJECT] Fetched project data: ${_project?['project_title']}');
-    } catch (error) {
-      if (mounted) {
-        setState(() {
-          _error = error.toString();
-          _loading = false;
-        });
-        EasyLoadingConfig.showError('Failed to load project details');
-      }
-    }
-  }
-
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _fetchProjectDetails();
+  // }
+  //
+  // Future<void> _fetchProjectDetails() async {
+  //   if (!mounted) return;
+  //
+  //   try {
+  //     setState(() {
+  //       _loading = true;
+  //       _error = null;
+  //     });
+  //
+  //     final supabaseProvider =
+  //         Provider.of<SupabaseProvider>(context, listen: false);
+  //     final supabase = supabaseProvider.supabase;
+  //
+  //     print(
+  //         '🔍 [PROJECT] Fetching project details for ID: ${widget.projectId}');
+  //
+  //     final response = await supabase.from('projects').select('''
+  //           *,
+  //           media:project_profile_picture_id (
+  //             filename,
+  //             url
+  //           )
+  //         ''').eq('id', widget.projectId).single();
+  //
+  //     if (mounted) {
+  //       setState(() {
+  //         _project = response;
+  //         _loading = false;
+  //       });
+  //     }
+  //
+  //     // Fetch gallery media if gallery_id exists
+  //     if (_project != null && _project!['gallery_id'] != null) {
+  //       try {
+  //         final galleryResponse =
+  //             await supabase.from('gallery_media').select('''
+  //               id,
+  //               image_id,
+  //               caption,
+  //               media_type,
+  //               media:image_id (
+  //                 filename,
+  //                 url
+  //               )
+  //             ''').eq('_parent_id', _project!['gallery_id']);
+  //
+  //         if (mounted && galleryResponse != null) {
+  //           setState(() {
+  //             _project!['gallery_media'] = galleryResponse;
+  //           });
+  //         }
+  //       } catch (galleryError) {
+  //         print('🔍 [PROJECT] Error fetching gallery: $galleryError');
+  //       }
+  //     }
+  //
+  //     print('🔍 [PROJECT] Fetched project data: ${_project?['project_title']}');
+  //   } catch (error) {
+  //     if (mounted) {
+  //       setState(() {
+  //         _error = error.toString();
+  //         _loading = false;
+  //       });
+  //       EasyLoadingConfig.showError('Failed to load project details');
+  //     }
+  //   }
+  // }
+  //
   String _formatDate(String? dateString) {
     if (dateString == null) return 'Unknown';
     try {
@@ -108,6 +108,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     }
   }
 
+  //
   String _getMonthName(int month) {
     const months = [
       'January',
@@ -211,167 +212,167 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     );
   }
 
-  Widget _buildGallerySection() {
-    if (_project == null || _project!['gallery_media'] == null)
-      return const SizedBox.shrink();
-
-    final galleryMedia =
-        List<Map<String, dynamic>>.from(_project!['gallery_media'] ?? []);
-
-    if (galleryMedia.isEmpty) return const SizedBox.shrink();
-
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDark = themeProvider.isDarkMode;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark
-              ? AppColors.darkMutedForeground
-              : AppColors.lightMutedForeground,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(
-                    Icons.photo_library,
-                    size: 18,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Project Gallery',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? AppColors.darkForeground
-                          : AppColors.lightForeground,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 160,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: galleryMedia.length,
-                itemBuilder: (context, index) {
-                  final media = galleryMedia[index];
-                  final filename = media['media']?['filename'];
-
-                  if (filename == null) {
-                    return Container(
-                      width: 256,
-                      margin: const EdgeInsets.only(right: 16),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkMutedForeground
-                            : AppColors.lightMutedForeground,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.image,
-                        size: 32,
-                        color: isDark
-                            ? AppColors.darkBackground
-                            : AppColors.lightBackground,
-                      ),
-                    );
-                  }
-
-                  final imageUrl =
-                      'https://ntckmekstkqxqgigqzgn.supabase.co/storage/v1/object/public/Media/$filename';
-
-                  return Container(
-                    width: 256,
-                    margin: const EdgeInsets.only(right: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            imageUrl,
-                            height: 120,
-                            width: 256,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                height: 120,
-                                width: 256,
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? AppColors.darkMutedForeground
-                                      : AppColors.lightMutedForeground,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Icons.image,
-                                  size: 32,
-                                  color: isDark
-                                      ? AppColors.darkBackground
-                                      : AppColors.lightBackground,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        if (media['caption'] != null &&
-                            media['caption'].toString().isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            media['caption'].toString(),
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
-                              color: isDark
-                                  ? AppColors.darkMutedForeground
-                                  : AppColors.lightMutedForeground,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildGallerySection() {
+  //   if (widget.project == null || widget.project.blogLink?.cover?.url == null)
+  //     return const SizedBox.shrink();
+  //
+  //   final galleryMedia =
+  //       List<Map<String, dynamic>>.from(_project!['gallery_media'] ?? []);
+  //
+  //   if (galleryMedia.isEmpty) return const SizedBox.shrink();
+  //
+  //   final themeProvider = Provider.of<ThemeProvider>(context);
+  //   final isDark = themeProvider.isDarkMode;
+  //
+  //   return Container(
+  //     margin: const EdgeInsets.only(bottom: 16.0),
+  //     decoration: BoxDecoration(
+  //       color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(
+  //         color: isDark
+  //             ? AppColors.darkMutedForeground
+  //             : AppColors.lightMutedForeground,
+  //         width: 1,
+  //       ),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.black.withOpacity(0.1),
+  //           blurRadius: 4,
+  //           offset: const Offset(0, 2),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(20.0),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Row(
+  //             children: [
+  //               Container(
+  //                 width: 32,
+  //                 height: 32,
+  //                 decoration: BoxDecoration(
+  //                   color: AppColors.primary.withOpacity(0.1),
+  //                   borderRadius: BorderRadius.circular(16),
+  //                 ),
+  //                 child: Icon(
+  //                   Icons.photo_library,
+  //                   size: 18,
+  //                   color: AppColors.primary,
+  //                 ),
+  //               ),
+  //               const SizedBox(width: 12),
+  //               Expanded(
+  //                 child: Text(
+  //                   'Project Gallery',
+  //                   style: TextStyle(
+  //                     fontFamily: 'Poppins',
+  //                     fontSize: 18,
+  //                     fontWeight: FontWeight.w600,
+  //                     color: isDark
+  //                         ? AppColors.darkForeground
+  //                         : AppColors.lightForeground,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 16),
+  //           SizedBox(
+  //             height: 160,
+  //             child: ListView.builder(
+  //               scrollDirection: Axis.horizontal,
+  //               itemCount: galleryMedia.length,
+  //               itemBuilder: (context, index) {
+  //                 final media = galleryMedia[index];
+  //                 final filename = media['media']?['filename'];
+  //
+  //                 if (filename == null) {
+  //                   return Container(
+  //                     width: 256,
+  //                     margin: const EdgeInsets.only(right: 16),
+  //                     decoration: BoxDecoration(
+  //                       color: isDark
+  //                           ? AppColors.darkMutedForeground
+  //                           : AppColors.lightMutedForeground,
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                     child: Icon(
+  //                       Icons.image,
+  //                       size: 32,
+  //                       color: isDark
+  //                           ? AppColors.darkBackground
+  //                           : AppColors.lightBackground,
+  //                     ),
+  //                   );
+  //                 }
+  //
+  //                 final imageUrl =
+  //                     'https://ntckmekstkqxqgigqzgn.supabase.co/storage/v1/object/public/Media/$filename';
+  //
+  //                 return Container(
+  //                   width: 256,
+  //                   margin: const EdgeInsets.only(right: 16),
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //                       ClipRRect(
+  //                         borderRadius: BorderRadius.circular(8),
+  //                         child: Image.network(
+  //                           imageUrl,
+  //                           height: 120,
+  //                           width: 256,
+  //                           fit: BoxFit.cover,
+  //                           errorBuilder: (context, error, stackTrace) {
+  //                             return Container(
+  //                               height: 120,
+  //                               width: 256,
+  //                               decoration: BoxDecoration(
+  //                                 color: isDark
+  //                                     ? AppColors.darkMutedForeground
+  //                                     : AppColors.lightMutedForeground,
+  //                                 borderRadius: BorderRadius.circular(8),
+  //                               ),
+  //                               child: Icon(
+  //                                 Icons.image,
+  //                                 size: 32,
+  //                                 color: isDark
+  //                                     ? AppColors.darkBackground
+  //                                     : AppColors.lightBackground,
+  //                               ),
+  //                             );
+  //                           },
+  //                         ),
+  //                       ),
+  //                       if (media['caption'] != null &&
+  //                           media['caption'].toString().isNotEmpty) ...[
+  //                         const SizedBox(height: 8),
+  //                         Text(
+  //                           media['caption'].toString(),
+  //                           style: TextStyle(
+  //                             fontFamily: 'Poppins',
+  //                             fontSize: 12,
+  //                             color: isDark
+  //                                 ? AppColors.darkMutedForeground
+  //                                 : AppColors.lightMutedForeground,
+  //                           ),
+  //                           maxLines: 2,
+  //                           overflow: TextOverflow.ellipsis,
+  //                         ),
+  //                       ],
+  //                     ],
+  //                   ),
+  //                 );
+  //               },
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _openDonationPage() {
     setState(() {
@@ -384,7 +385,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
 
-    if (_loading) {
+    if (widget.project == null) {
       return Scaffold(
         backgroundColor: Colors.transparent,
         body: const Center(
@@ -400,7 +401,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       );
     }
 
-    if (_error != null || _project == null) {
+    if (_error != null || widget.project == null) {
       return Scaffold(
         backgroundColor: Colors.transparent,
         body: Center(
@@ -427,7 +428,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: _fetchProjectDetails,
+                onPressed: () {},
                 child: const Text('Try Again'),
               ),
             ],
@@ -436,11 +437,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       );
     }
 
-    final project = _project!;
-    final projectTitle = project['project_title'] ?? 'Unknown Project';
-    final imageUrl = project['media']?['filename'] != null
-        ? 'https://ntckmekstkqxqgigqzgn.supabase.co/storage/v1/object/public/Media/${project['media']['filename']}'
-        : null;
+    final project = widget.project;
+    final projectTitle = project.title ?? 'Unknown Project';
+    final imageUrl = project.image?.url != null ? project.image?.url : null;
 
     return Stack(
       children: [
@@ -528,7 +527,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          project['project_type'] ?? 'Project',
+                          project.category ?? 'Project',
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14,
@@ -564,7 +563,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Last updated: ${_formatDate(project['updated_at'])}',
+                            'Last updated: ${_formatDate(project.updatedAt.toString())}',
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 14,
@@ -577,8 +576,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       ),
                       const SizedBox(height: 24),
 
-                      // Goal section
-                      if (project['goal'] != null)
+                      // BlogLink section
+                      if (project.blogLink != null)
                         Container(
                           margin: const EdgeInsets.only(bottom: 24.0),
                           padding: const EdgeInsets.all(20.0),
@@ -593,116 +592,239 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Icon(
-                                      Icons.flag_outlined,
-                                      size: 18,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      'Project Goal',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark
-                                            ? AppColors.darkForeground
-                                            : AppColors.lightForeground,
+                              // Heading
+                              if (project.blogLink!.heading != null)
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            AppColors.primary.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Icon(
+                                        Icons.flag_outlined,
+                                        size: 18,
+                                        color: AppColors.primary,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                project['goal'],
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  color: isDark
-                                      ? AppColors.darkMutedForeground
-                                      : AppColors.lightMutedForeground,
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        project.blogLink!.heading!,
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? AppColors.darkForeground
+                                              : AppColors.lightForeground,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
+                              const SizedBox(height: 16),
+
+                              // SubHeading
+                              if (project.blogLink!.subHeading != null)
+                                Text(
+                                  project.blogLink!.subHeading!,
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 16,
+                                    color: isDark
+                                        ? AppColors.darkMutedForeground
+                                        : AppColors.lightMutedForeground,
+                                  ),
+                                ),
+
+                              const SizedBox(height: 16),
+
+                              // Body blocks
+                              if (project.blogLink!.body != null)
+                                ...project.blogLink!.body!.map(
+                                  (block) {
+                                    if (block['type'] == 'heading') {
+                                      final text = (block['children'] as List)
+                                          .map((e) => e['text'])
+                                          .join();
+                                      return Text(
+                                        text,
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark
+                                              ? AppColors.darkForeground
+                                              : AppColors.lightForeground,
+                                        ),
+                                      );
+                                    } else if (block['type'] == 'paragraph') {
+                                      final text = (block['children'] as List)
+                                          .map((e) => e['text'])
+                                          .join();
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 8.0),
+                                        child: Text(
+                                          text,
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 16,
+                                            color: isDark
+                                                ? AppColors.darkMutedForeground
+                                                : AppColors
+                                                    .lightMutedForeground,
+                                          ),
+                                        ),
+                                      );
+                                    } else if (block['type'] == 'image') {
+                                      final imageUrl = block['image']?['url'];
+                                      if (imageUrl == null)
+                                        return const SizedBox.shrink();
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12.0),
+                                        child: Image.network(imageUrl),
+                                      );
+                                    } else {
+                                      return const SizedBox.shrink();
+                                    }
+                                  },
+                                ),
                             ],
                           ),
                         ),
 
-                      // Impact section
-                      if (project['impact'] != null)
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 24.0),
-                          padding: const EdgeInsets.all(20.0),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.05),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: AppColors.primary.withOpacity(0.2),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Icon(
-                                      Icons.trending_up_outlined,
-                                      size: 18,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      'Expected Impact',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark
-                                            ? AppColors.darkForeground
-                                            : AppColors.lightForeground,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                project['impact'],
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  color: isDark
-                                      ? AppColors.darkMutedForeground
-                                      : AppColors.lightMutedForeground,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      // Goal section
+                      // if (project['goal'] != null)
+                      //   Container(
+                      //     margin: const EdgeInsets.only(bottom: 24.0),
+                      //     padding: const EdgeInsets.all(20.0),
+                      //     decoration: BoxDecoration(
+                      //       color: AppColors.primary.withOpacity(0.05),
+                      //       borderRadius: BorderRadius.circular(12),
+                      //       border: Border.all(
+                      //         color: AppColors.primary.withOpacity(0.2),
+                      //         width: 1,
+                      //       ),
+                      //     ),
+                      //     child: Column(
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: [
+                      //         Row(
+                      //           children: [
+                      //             Container(
+                      //               width: 32,
+                      //               height: 32,
+                      //               decoration: BoxDecoration(
+                      //                 color: AppColors.primary.withOpacity(0.2),
+                      //                 borderRadius: BorderRadius.circular(16),
+                      //               ),
+                      //               child: Icon(
+                      //                 Icons.flag_outlined,
+                      //                 size: 18,
+                      //                 color: AppColors.primary,
+                      //               ),
+                      //             ),
+                      //             const SizedBox(width: 12),
+                      //             Expanded(
+                      //               child: Text(
+                      //                 'Project Goal',
+                      //                 style: TextStyle(
+                      //                   fontFamily: 'Poppins',
+                      //                   fontSize: 18,
+                      //                   fontWeight: FontWeight.w600,
+                      //                   color: isDark
+                      //                       ? AppColors.darkForeground
+                      //                       : AppColors.lightForeground,
+                      //                 ),
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //         const SizedBox(height: 16),
+                      //         Text(
+                      //           project['goal'],
+                      //           style: TextStyle(
+                      //             fontFamily: 'Poppins',
+                      //             fontSize: 16,
+                      //             color: isDark
+                      //                 ? AppColors.darkMutedForeground
+                      //                 : AppColors.lightMutedForeground,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      //
+                      // // Impact section
+                      // if (project['impact'] != null)
+                      //   Container(
+                      //     margin: const EdgeInsets.only(bottom: 24.0),
+                      //     padding: const EdgeInsets.all(20.0),
+                      //     decoration: BoxDecoration(
+                      //       color: AppColors.primary.withOpacity(0.05),
+                      //       borderRadius: BorderRadius.circular(12),
+                      //       border: Border.all(
+                      //         color: AppColors.primary.withOpacity(0.2),
+                      //         width: 1,
+                      //       ),
+                      //     ),
+                      //     child: Column(
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: [
+                      //         Row(
+                      //           children: [
+                      //             Container(
+                      //               width: 32,
+                      //               height: 32,
+                      //               decoration: BoxDecoration(
+                      //                 color: AppColors.primary.withOpacity(0.2),
+                      //                 borderRadius: BorderRadius.circular(16),
+                      //               ),
+                      //               child: Icon(
+                      //                 Icons.trending_up_outlined,
+                      //                 size: 18,
+                      //                 color: AppColors.primary,
+                      //               ),
+                      //             ),
+                      //             const SizedBox(width: 12),
+                      //             Expanded(
+                      //               child: Text(
+                      //                 'Expected Impact',
+                      //                 style: TextStyle(
+                      //                   fontFamily: 'Poppins',
+                      //                   fontSize: 18,
+                      //                   fontWeight: FontWeight.w600,
+                      //                   color: isDark
+                      //                       ? AppColors.darkForeground
+                      //                       : AppColors.lightForeground,
+                      //                 ),
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //         const SizedBox(height: 16),
+                      //         Text(
+                      //           project['impact'],
+                      //           style: TextStyle(
+                      //             fontFamily: 'Poppins',
+                      //             fontSize: 16,
+                      //             color: isDark
+                      //                 ? AppColors.darkMutedForeground
+                      //                 : AppColors.lightMutedForeground,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
 
                       // Gallery section
-                      _buildGallerySection(),
+                      // _buildGallerySection(),
 
                       // Support button
                       Container(

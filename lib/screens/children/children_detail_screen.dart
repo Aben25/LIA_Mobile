@@ -38,41 +38,24 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
         _error = null;
       });
 
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
-      final supabase = supabaseProvider.supabase;
+      // Commented out during Strapi transition
+      // final supabaseProvider =
+      //     Provider.of<SupabaseProvider>(context, listen: false);
+      // final supabase = supabaseProvider.supabase;
 
       print('🔍 [CHILDREN] Fetching sponsee details for ID: ${widget.childId}');
 
-      final response = await supabase.from('sponsees').select('''
-            *,
-            media:profile_picture_id (
-              filename,
-              url
-            ),
-            gallery:gallery_id (
-              id,
-              name,
-              description,
-              gallery_media (
-                id,
-                caption,
-                media:image_id (
-                  filename,
-                  url
-                )
-              )
-            )
-          ''').eq('id', widget.childId).single();
+      // TODO: Implement with Strapi API
+      // Simulate loading delay
+      await Future.delayed(const Duration(seconds: 1));
 
       if (mounted) {
         setState(() {
-          _sponsee = response;
           _loading = false;
+          _error =
+              'Children details feature is temporarily unavailable during migration to Strapi';
         });
       }
-
-      print('🔍 [CHILDREN] Fetched sponsee data: ${_sponsee?['full_name']}');
     } catch (error) {
       if (mounted) {
         setState(() {

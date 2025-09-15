@@ -6,7 +6,7 @@ import '../utils/easy_loading_config.dart';
 class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
 
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.dark;
 
   ThemeMode get themeMode => _themeMode;
 
@@ -39,8 +39,8 @@ class ThemeProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      // If there's an error, default to system mode
-      _themeMode = ThemeMode.system;
+      // If there's an error, default to dark mode
+      _themeMode = ThemeMode.dark;
     }
   }
 

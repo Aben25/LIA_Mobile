@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/supabase_provider.dart';
+import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
-import '../../utils/easy_loading_config.dart';
+import '../../utils/app_messaging.dart';
 import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String? initialCode;
+
+  const ResetPasswordScreen({super.key, this.initialCode});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -15,14 +17,26 @@ class ResetPasswordScreen extends StatefulWidget {
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _codeController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _isCodeValid = true;
   bool _isPasswordValid = true;
   bool _isConfirmValid = true;
   bool _isSuccess = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Set initial code if provided
+    if (widget.initialCode != null && widget.initialCode!.isNotEmpty) {
+      _codeController.text = widget.initialCode!;
+    }
+  }
+
+  @override
   void dispose() {
+    _codeController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -35,12 +49,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Future<void> _handleResetPassword() async {
     // Reset validations
     setState(() {
+      _isCodeValid = true;
       _isPasswordValid = true;
       _isConfirmValid = true;
     });
 
     // Validate fields
     bool isValid = true;
+
+    if (_codeController.text.trim().isEmpty) {
+      setState(() {
+        _isCodeValid = false;
+      });
+      isValid = false;
+    }
 
     if (!_passwordController.text.isNotEmpty ||
         !_validatePassword(_passwordController.text)) {
@@ -62,15 +84,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     }
 
     try {
-      EasyLoadingConfig.showLoading();
+      AppMessaging.showLoading('Resetting password...');
 
-      final supabaseProvider =
-          Provider.of<SupabaseProvider>(context, listen: false);
+      final strapiAuthProvider =
+          Provider.of<StrapiAuthProvider>(context, listen: false);
 
-      await supabaseProvider.updatePassword(_passwordController.text);
+      await strapiAuthProvider.resetPassword(
+        code: _codeController.text.trim(),
+        password: _passwordController.text,
+        passwordConfirmation: _confirmPasswordController.text,
+      );
 
-      EasyLoadingConfig.dismiss();
-      EasyLoadingConfig.showToast('Password updated successfully!');
+      AppMessaging.dismiss();
+      AppMessaging.showSuccess('Password reset successfully!');
 
       setState(() {
         _isSuccess = true;
@@ -78,10 +104,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
       // Success is handled in the UI
     } catch (error) {
-      EasyLoadingConfig.dismiss();
-      print('Error updating password: $error');
-      EasyLoadingConfig.showError(
-        'Failed to update password. Please try again.',
+      AppMessaging.dismiss();
+      print('Error resetting password: $error');
+      AppMessaging.showError(
+        'Failed to reset password. Please check your reset code and try again.',
       );
     }
   }
@@ -150,6 +176,92 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
 
                   const SizedBox(height: 32),
+
+                  // Reset Code Field
+                  Text(
+                    'Reset Code',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? AppColors.darkForeground
+                          : AppColors.lightForeground,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  TextFormField(
+                    controller: _codeController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter the code from your email',
+                      hintStyle: TextStyle(
+                        color: isDark
+                            ? AppColors.darkMutedForeground
+                            : AppColors.lightMutedForeground,
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? AppColors.darkBackground
+                          : AppColors.lightBackground,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: _isCodeValid
+                              ? (isDark
+                                  ? AppColors.darkMutedForeground
+                                  : AppColors.lightMutedForeground)
+                              : Colors.red,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? AppColors.darkMutedForeground
+                              : AppColors.lightMutedForeground,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.red),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 16),
+                    ),
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.darkForeground
+                          : AppColors.lightForeground,
+                    ),
+                    onChanged: (value) {
+                      if (_isCodeValid == false) {
+                        setState(() {
+                          _isCodeValid = true;
+                        });
+                      }
+                    },
+                  ),
+
+                  if (!_isCodeValid) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Please enter the reset code from your email',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 24),
 
                   // New Password Field
                   Text(

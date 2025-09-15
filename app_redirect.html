@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting to Love in Action App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h2>Redirecting to Love in Action App...</h2>
+        <p>If the app doesn't open automatically, <a href="#" id="fallback-link">click here</a></p>
+    </div>
+
+    <script>
+        // Function to extract URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Get current path to determine action
+        var path = window.location.pathname;
+        var token = getUrlParameter('token');
+        var code = getUrlParameter('code');
+
+        var appUrl = '';
+        var fallbackUrl = '';
+
+        // Determine the action based on the path
+        if (path.includes('/confirm')) {
+            appUrl = 'loveinaction://confirm?token=' + token;
+            fallbackUrl = 'loveinaction://confirm?token=' + token;
+        } else if (path.includes('/reset')) {
+            appUrl = 'loveinaction://reset?code=' + code;
+            fallbackUrl = 'loveinaction://reset?code=' + code;
+        }
+
+        // Set fallback link
+        document.getElementById('fallback-link').href = fallbackUrl;
+
+        // Try to redirect to the app
+        if (appUrl) {
+            // Try to open the app
+            window.location.href = appUrl;
+            
+            // Fallback: if app doesn't open after 2 seconds, show message
+            setTimeout(function() {
+                document.body.innerHTML = 
+                    '<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">' +
+                    '<h2>Love in Action App Not Found</h2>' +
+                    '<p>Please install the Love in Action app and try again.</p>' +
+                    '<p>Or <a href="' + fallbackUrl + '">click here to try opening the app</a></p>' +
+                    '</div>';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
