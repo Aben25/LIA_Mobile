@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.5.0
@@ -131,17 +131,37 @@ flutter:
   # For details regarding fonts from package dependencies,
 # see https://flutter.dev/to/font-from-package
 
-  # Custom fonts for the app
+  # Custom fonts for the app - Using Specify fonts from LIA website
   fonts:
-    - family: Poppins
+    - family: Specify
       fonts:
-        - asset: assets/fonts/Poppins-Regular.ttf
-        - asset: assets/fonts/Poppins-Medium.ttf
+        - asset: assets/fonts/Specify-NormalLight.otf
+          weight: 300
+        - asset: assets/fonts/Specify-NormalMedium.otf
           weight: 500
-        - asset: assets/fonts/Poppins-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Poppins-Bold.ttf
+        - asset: assets/fonts/Specify-NormalBold.otf
           weight: 700
+        - asset: assets/fonts/Specify-NormalLightItalic.otf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/Specify-NormalMediumItalic.otf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Specify-NormalBoldItalic.otf
+          weight: 700
+          style: italic
+    - family: SpecifyExpanded
+      fonts:
+        - asset: assets/fonts/Specify-ExpandedMedium.otf
+          weight: 500
+        - asset: assets/fonts/Specify-ExpandedBold.otf
+          weight: 700
+        - asset: assets/fonts/Specify-ExpandedMediumItalic.otf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Specify-ExpandedBoldItalic.otf
+          weight: 700
+          style: italic
 
 # Dependency overrides to fix compatibility issues
 dependency_overrides:

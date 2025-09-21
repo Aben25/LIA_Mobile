@@ -159,7 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                   Text(
                     title,
                     style: const TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -168,7 +168,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     Text(
                       description,
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 12,
                         color: Colors.grey[600],
                       ),
@@ -219,7 +219,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                   Text(
                     'Settings',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: isDark
@@ -277,7 +277,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                 Text(
                                   'Profile',
                                   style: TextStyle(
-                                    fontFamily: 'Poppins',
+                                    fontFamily: 'Specify',
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: isDark
@@ -288,7 +288,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                 Text(
                                   '${user?.email}',
                                   style: TextStyle(
-                                    fontFamily: 'Poppins',
+                                    fontFamily: 'Specify',
                                     fontSize: 14,
                                     color: isDark
                                         ? AppColors.darkMutedForeground
@@ -323,7 +323,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                           child: Text(
                             'Security',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: isDark
@@ -370,7 +370,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                           child: Text(
                             'Preferences',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: isDark
@@ -441,7 +441,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                           child: Text(
                             'Help & Support',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: isDark
@@ -477,7 +477,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                             child: Text(
                               'Version $_appVersion',
                               style: TextStyle(
-                                fontFamily: 'Poppins',
+                                fontFamily: 'Specify',
                                 fontSize: 12,
                                 color: isDark
                                     ? AppColors.darkMutedForeground
@@ -502,7 +502,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         child: Text(
                           'ACCOUNT MANAGEMENT',
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: isDark
@@ -540,7 +540,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                       Text(
                                         'Delete Account',
                                         style: TextStyle(
-                                          fontFamily: 'Poppins',
+                                          fontFamily: 'Specify',
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.red[400],
@@ -549,7 +549,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                                       Text(
                                         'Permanently delete your account and all data',
                                         style: TextStyle(
-                                          fontFamily: 'Poppins',
+                                          fontFamily: 'Specify',
                                           fontSize: 12,
                                           color: isDark
                                               ? AppColors.darkMutedForeground
@@ -597,7 +597,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                           Text(
                             'Sign Out',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

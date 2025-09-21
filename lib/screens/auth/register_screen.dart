@@ -146,7 +146,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Text(
                   'Join Our Mission',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: isDark
@@ -160,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Text(
                   'Create an account to start making a difference',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 16,
                     color: isDark
                         ? AppColors.darkMutedForeground
@@ -193,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Text(
                           PasswordValidator.getPasswordPolicyDescription(),
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             fontSize: 12,
                             color: AppColors.primary,
                             fontWeight: FontWeight.w500,
@@ -390,7 +390,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         : const Text(
                             'Create Account',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                             ),
@@ -407,7 +407,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Text(
                       'Already have an account? ',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         color: isDark
                             ? AppColors.darkMutedForeground
                             : AppColors.lightMutedForeground,
@@ -424,7 +424,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Text(
                         'Sign In',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
                         ),

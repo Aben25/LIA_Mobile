@@ -127,7 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(
                 user.username ?? 'No username',
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: isDark
@@ -140,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(
                 user.email ?? 'No email',
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 16,
                   color: isDark
                       ? AppColors.darkMutedForeground
@@ -161,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Text(
                   user.confirmed == true ? 'Verified' : 'Unverified',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color:
@@ -278,7 +278,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: const Text(
                         'Edit Profile',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
@@ -308,7 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: const Text(
                         'Change Password',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
@@ -412,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Text(
               'Account Information',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: isDark
@@ -479,7 +479,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Text(
             label,
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 14,
               color: isDark
                   ? AppColors.darkMutedForeground
@@ -490,7 +490,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Text(
           value,
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: valueColor ??
@@ -517,7 +517,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Text(
           'Profile',
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: themeProvider.isDarkMode
@@ -551,7 +551,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     'No user data available',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       color: themeProvider.isDarkMode
                           ? AppColors.darkMutedForeground

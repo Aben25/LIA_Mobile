@@ -77,7 +77,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
         title: Text(
           'Love in Action',
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color:
@@ -125,11 +125,11 @@ class _MainAppScreenState extends State<MainAppScreen> {
               ? AppColors.darkMutedForeground
               : AppColors.lightMutedForeground,
           selectedLabelStyle: const TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontWeight: FontWeight.w600,
           ),
           unselectedLabelStyle: const TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontWeight: FontWeight.w500,
           ),
           items: const [
@@ -189,7 +189,7 @@ class PlaceholderScreen extends StatelessWidget {
             Text(
               '$title Screen',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: isDark
@@ -201,7 +201,7 @@ class PlaceholderScreen extends StatelessWidget {
             Text(
               'Coming soon!',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 16,
                 color: isDark
                     ? AppColors.darkMutedForeground

@@ -120,7 +120,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Text(
                     'Love in Action',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: isDark
@@ -143,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Text(
                     'Making a difference, one child at a time',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       color: isDark
                           ? AppColors.darkMutedForeground

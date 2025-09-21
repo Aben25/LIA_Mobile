@@ -52,7 +52,7 @@ class WelcomeScreen extends StatelessWidget {
                   Text(
                     'Love in Action',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: isDark
@@ -65,7 +65,7 @@ class WelcomeScreen extends StatelessWidget {
                   Text(
                     'Making a difference, one child at a time',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       color: isDark
                           ? AppColors.darkMutedForeground
@@ -99,7 +99,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: const Text(
                     'Sign In',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -129,7 +129,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: const Text(
                     'Create Account',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -156,7 +156,7 @@ class WelcomeScreen extends StatelessWidget {
                     child: Text(
                       isDark ? 'Light Mode' : 'Dark Mode',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 14,
                         color: isDark
                             ? AppColors.darkMutedForeground
@@ -180,7 +180,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: Text(
                     'Explore as Guest',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       color: AppColors.primary,
                       decoration: TextDecoration.underline,

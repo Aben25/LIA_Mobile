@@ -51,7 +51,7 @@ class PasswordStrengthIndicator extends StatelessWidget {
               Text(
                 result.strengthDescription,
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: _getBackgroundColor(strength),
@@ -66,7 +66,7 @@ class PasswordStrengthIndicator extends StatelessWidget {
             Text(
               'Password Requirements:',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey[700],
@@ -91,7 +91,7 @@ class PasswordStrengthIndicator extends StatelessWidget {
                       child: Text(
                         requirement,
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 11,
                           color: isValid ? Colors.green[700] : Colors.grey[600],
                           decoration:

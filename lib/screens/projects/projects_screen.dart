@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
+import '../../utils/network_error_handler.dart';
 import 'project_detail_screen.dart';
 import '../../services/projects_service.dart';
 import '../../models/cause.dart';
@@ -45,10 +46,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     } catch (error) {
       if (mounted) {
         setState(() {
-          _error = error.toString();
+          _error = NetworkErrorHandler.getErrorMessage(error);
           _loading = false;
         });
-        EasyLoadingConfig.showError('Failed to load projects');
+        EasyLoadingConfig.showError(NetworkErrorHandler.getErrorMessage(error));
       }
     }
   }
@@ -77,14 +78,14 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     );
   }
 
-
   Widget _buildProjectCard(Cause project) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
 
     // Causes do not currently have an image field defined in the shared sample.
     // Keep placeholder image for now.
-    final String? imageUrl = project.image?.url != null ? project.image?.url : null;
+    final String? imageUrl =
+        project.image?.url != null ? project.image?.url : null;
     print('🔍 [PROJECTS] Image URL: $imageUrl');
 
     return Container(
@@ -182,7 +183,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                     child: Text(
                       project.category ?? 'General',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primary,
@@ -194,7 +195,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                   Text(
                     project.title,
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: isDark
@@ -209,7 +210,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                   Text(
                     project.description ?? 'No description available',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       color: isDark
                           ? AppColors.darkMutedForeground
@@ -240,7 +241,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         Text(
                           'Category:',
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: isDark
@@ -252,7 +253,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         Text(
                           project.category ?? 'General',
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             fontSize: 16,
                             color: isDark
                                 ? AppColors.darkMutedForeground
@@ -301,7 +302,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           Text(
             'No Projects Found',
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color:
@@ -312,7 +313,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           Text(
             'There are no active projects at the moment. Please check back later.',
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 16,
               color: isDark
                   ? AppColors.darkMutedForeground
@@ -346,7 +347,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                     Text(
                       'Projects',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: isDark
@@ -366,7 +367,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 child: Text(
                   'Explore our ongoing projects that are making a difference.',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 20,
                     color: isDark
                         ? AppColors.darkMutedForeground
@@ -400,7 +401,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       Text(
                         'Something went wrong',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
@@ -408,7 +409,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       const SizedBox(height: 16),
                       Text(
                         _error ?? 'An unexpected error occurred',
-                        style: TextStyle(fontFamily: 'Poppins'),
+                        style: TextStyle(fontFamily: 'Specify'),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),

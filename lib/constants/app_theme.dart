@@ -6,7 +6,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      fontFamily: 'Poppins',
+      fontFamily: 'Specify',
 
       // Color Scheme
       colorScheme: const ColorScheme.light(
@@ -27,15 +27,15 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          fontFamily: 'Poppins',
+          fontFamily: 'Specify',
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: AppColors.lightForeground,
         ),
       ),
 
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.lightCard,
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -55,9 +55,9 @@ class AppTheme {
             borderRadius: BorderRadius.circular(8),
           ),
           textStyle: const TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
@@ -85,7 +85,7 @@ class AppTheme {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         labelStyle: const TextStyle(
-          fontFamily: 'Poppins',
+          fontFamily: 'Specify',
           color: AppColors.lightMutedForeground,
         ),
       ),
@@ -105,7 +105,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      fontFamily: 'Poppins',
+      fontFamily: 'Specify',
 
       // Color Scheme
       colorScheme: const ColorScheme.dark(
@@ -126,15 +126,15 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          fontFamily: 'Poppins',
+          fontFamily: 'Specify',
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: AppColors.darkForeground,
         ),
       ),
 
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.darkCard,
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -154,9 +154,9 @@ class AppTheme {
             borderRadius: BorderRadius.circular(8),
           ),
           textStyle: const TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
@@ -184,7 +184,7 @@ class AppTheme {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         labelStyle: const TextStyle(
-          fontFamily: 'Poppins',
+          fontFamily: 'Specify',
           color: AppColors.darkMutedForeground,
         ),
       ),

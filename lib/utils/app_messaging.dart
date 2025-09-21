@@ -180,7 +180,7 @@ class AppErrorMessage extends StatelessWidget {
             child: Text(
               message!,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 12,
                 color: AppColors.error,
                 fontWeight: FontWeight.w500,
@@ -239,7 +239,7 @@ class AppSuccessMessage extends StatelessWidget {
             child: Text(
               message!,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 12,
                 color: AppColors.success,
                 fontWeight: FontWeight.w500,
@@ -298,7 +298,7 @@ class AppInfoMessage extends StatelessWidget {
             child: Text(
               message!,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 12,
                 color: AppColors.info,
                 fontWeight: FontWeight.w500,

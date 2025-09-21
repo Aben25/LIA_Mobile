@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../constants/app_colors.dart';
 import '../models/cause.dart';
+import '../utils/network_error_handler.dart';
 import 'auth/login_screen.dart';
 import 'projects/project_detail_screen.dart';
 import '../services/projects_service.dart';
@@ -45,7 +46,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
       }
     } catch (e) {
       setState(() {
-        _error = e.toString();
+        _error = NetworkErrorHandler.getErrorMessage(e);
         _loading = false;
       });
     }
@@ -124,7 +125,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
                 child: Text(
                   '${project.category ?? 'General'}',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: AppColors.primary,
@@ -136,7 +137,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
               Text(
                 project.title,
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: isDark
@@ -151,7 +152,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
               Text(
                 project.description ?? 'No description available',
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 14,
                   color: isDark
                       ? AppColors.darkMutedForeground
@@ -186,7 +187,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
                       child: Text(
                         'Sign in to donate and support this project',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 12,
                           color: AppColors.primary,
                         ),
@@ -221,7 +222,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
           Text(
             'No projects available',
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color:
@@ -232,7 +233,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
           Text(
             'Check back later for new projects',
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 16,
               color: isDark
                   ? AppColors.darkMutedForeground
@@ -267,9 +268,9 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
         title: Text(
           'Browse Projects',
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color:
                 isDark ? AppColors.darkForeground : AppColors.lightForeground,
           ),
@@ -280,7 +281,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
             child: Text(
               'Sign In',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: AppColors.primary,
@@ -316,7 +317,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
                         Text(
                           'Something went wrong',
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: isDark
@@ -328,7 +329,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
                         Text(
                           _error ?? 'An unexpected error occurred',
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             color: isDark
                                 ? AppColors.darkMutedForeground
                                 : AppColors.lightMutedForeground,
@@ -352,7 +353,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
                           child: Text(
                             'Sign in to donate and support these amazing projects',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 16,
                               color: isDark
                                   ? AppColors.darkMutedForeground

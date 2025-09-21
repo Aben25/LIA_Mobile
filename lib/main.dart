@@ -39,7 +39,15 @@ void main() async {
   runApp(const LoveInActionApp());
 }
 
+bool _globalListenersSetup = false; // Prevent multiple setup
+
 void _setupGlobalDeepLinkListeners() {
+  if (_globalListenersSetup) {
+    debugPrint('🔗 [Global] Deep link listeners already set up, skipping...');
+    return;
+  }
+
+  _globalListenersSetup = true;
   final deepLinkService = DeepLinkService();
 
   debugPrint('🔗 [Global] Setting up deep link listeners once at app level...');
@@ -176,53 +184,42 @@ class LoveInActionApp extends StatelessWidget {
         // Commented out during transition to Strapi
         // ChangeNotifierProvider(create: (_) => SupabaseProvider()),
         // ChangeNotifierProvider(create: (_) => FirebaseAuthProvider()),
-        ChangeNotifierProvider(create: (_) => StrapiAuthProvider()),
+        ChangeNotifierProvider(create: (_) {
+          final provider = StrapiAuthProvider();
+          // Initialize auth once when provider is created
+          provider.initializeAuth();
+          return provider;
+        }),
       ],
-      child: Consumer<StrapiAuthProvider>(
-        builder: (context, strapiAuthProvider, child) {
-          // Initialize Strapi auth (primary auth)
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          // Configure messaging for current theme
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            // Commented out during transition to Strapi
-            // supabaseProvider.initializeAuth();
-            // firebaseAuthProvider.initializeAuth();
-
-            // Initialize Strapi auth (primary auth)
-            final strapiProvider =
-                Provider.of<StrapiAuthProvider>(context, listen: false);
-            strapiProvider.initializeAuth();
+            AppMessaging.configureForTheme(context);
           });
 
-          return Consumer<ThemeProvider>(
-            builder: (context, themeProvider, child) {
-              // Configure messaging for current theme
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                AppMessaging.configureForTheme(context);
-              });
-
-              return DeepLinkHandler(
-                child: MaterialApp(
-                  navigatorKey: navigatorKey,
-                  title: 'Love in Action',
-                  debugShowCheckedModeBanner: false,
-                  themeMode: themeProvider.themeMode,
-                  theme: themeProvider.getThemeData(Brightness.light),
-                  darkTheme: themeProvider.getThemeData(Brightness.dark),
-                  home: Consumer<StrapiAuthProvider>(
-                    builder: (context, strapiAuthProvider, child) {
-                      // Use Strapi for authentication gating
-                      if (!strapiAuthProvider.initialized) {
-                        return const WelcomeScreen();
-                      }
-                      if (!strapiAuthProvider.isAuthenticated) {
-                        return const WelcomeScreen();
-                      }
-                      return const MainAppScreen();
-                    },
-                  ),
-                  builder: EasyLoading.init(),
-                ),
-              );
-            },
+          return DeepLinkHandler(
+            child: MaterialApp(
+              navigatorKey: navigatorKey,
+              title: 'Love in Action',
+              debugShowCheckedModeBanner: false,
+              themeMode: themeProvider.themeMode,
+              theme: themeProvider.getThemeData(Brightness.light),
+              darkTheme: themeProvider.getThemeData(Brightness.dark),
+              home: Consumer<StrapiAuthProvider>(
+                builder: (context, strapiAuthProvider, child) {
+                  // Use Strapi for authentication gating
+                  if (!strapiAuthProvider.initialized) {
+                    return const WelcomeScreen();
+                  }
+                  if (!strapiAuthProvider.isAuthenticated) {
+                    return const WelcomeScreen();
+                  }
+                  return const MainAppScreen();
+                },
+              ),
+              builder: EasyLoading.init(),
+            ),
           );
         },
       ),

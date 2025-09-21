@@ -4,6 +4,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/supabase_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
+import '../../utils/network_error_handler.dart';
 import 'full_gallery_screen.dart';
 
 class ChildrenDetailScreen extends StatefulWidget {
@@ -59,10 +60,10 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
     } catch (error) {
       if (mounted) {
         setState(() {
-          _error = error.toString();
+          _error = NetworkErrorHandler.getErrorMessage(error);
           _loading = false;
         });
-        EasyLoadingConfig.showError('Failed to load child details');
+        EasyLoadingConfig.showError(NetworkErrorHandler.getErrorMessage(error));
       }
     }
   }
@@ -168,7 +169,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: isDark
@@ -183,7 +184,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
             Text(
               content,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 16,
                 color: isDark
                     ? AppColors.darkMutedForeground
@@ -232,7 +233,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
             Text(
               label,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 12,
                 color: isDark
                     ? AppColors.darkMutedForeground
@@ -243,7 +244,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
             Text(
               value,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: isDark
@@ -314,7 +315,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                   child: Text(
                     'Photo Gallery',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: isDark
@@ -342,7 +343,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                           Text(
                             'View All',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 14,
                               color: AppColors.primary,
                             ),
@@ -364,7 +365,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
               Text(
                 gallery['description'],
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 16,
                   color: isDark
                       ? AppColors.darkMutedForeground
@@ -534,7 +535,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
               Text(
                 'Could not find the child\'s information',
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: isDark
@@ -576,7 +577,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
         title: Text(
           'Child Details',
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color:
@@ -674,7 +675,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                   Text(
                     fullName,
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: isDark
@@ -698,7 +699,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                           child: Text(
                             sponsee['location'],
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 16,
                               color: isDark
                                   ? AppColors.darkMutedForeground
@@ -746,7 +747,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                                 child: Text(
                                   'About ${fullName.split(' ').first}',
                                   style: TextStyle(
-                                    fontFamily: 'Poppins',
+                                    fontFamily: 'Specify',
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
                                     color: isDark
@@ -761,7 +762,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                           Text(
                             sponsee['about'],
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 16,
                               color: isDark
                                   ? AppColors.darkMutedForeground
@@ -835,7 +836,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                                 child: Text(
                                   'How Your Sponsorship Helps',
                                   style: TextStyle(
-                                    fontFamily: 'Poppins',
+                                    fontFamily: 'Specify',
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
                                     color: isDark
@@ -850,7 +851,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                           Text(
                             sponsee['how_sponsorship_will_help'],
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 16,
                               color: isDark
                                   ? AppColors.darkMutedForeground

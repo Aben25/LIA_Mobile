@@ -21,17 +21,22 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
   bool _isSuccess = false;
   bool _isError = false;
   String? _errorMessage;
+  bool _hasConfirmed = false; // Prevent multiple confirmation attempts
 
   @override
   void initState() {
     super.initState();
     // If token is provided, automatically start confirmation
-    if (widget.token != null && widget.token!.isNotEmpty) {
+    if (widget.token != null && widget.token!.isNotEmpty && !_hasConfirmed) {
       _confirmEmail(widget.token!);
     }
   }
 
   Future<void> _confirmEmail(String token) async {
+    if (_hasConfirmed) return; // Prevent multiple calls
+
+    _hasConfirmed = true; // Mark as confirmed to prevent multiple calls
+
     setState(() {
       _isConfirming = true;
       _isError = false;
@@ -48,10 +53,12 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
       AppMessaging.dismiss();
       AppMessaging.showSuccess('Email confirmed successfully!');
 
-      setState(() {
-        _isConfirming = false;
-        _isSuccess = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isConfirming = false;
+          _isSuccess = true;
+        });
+      }
 
       // Wait a moment then navigate to login screen
       Future.delayed(const Duration(seconds: 2), () {
@@ -65,16 +72,25 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
     } catch (error) {
       AppMessaging.dismiss();
 
+      // Debug: Print the exact error to understand what's happening
+      debugPrint('🔗 [EmailConfirmation] Caught error: $error');
+      debugPrint('🔗 [EmailConfirmation] Error type: ${error.runtimeType}');
+
       // Check if it's a token validation error (already used/expired)
       String errorMessage = error.toString().toLowerCase();
+      debugPrint('🔗 [EmailConfirmation] Error message: $errorMessage');
       if (errorMessage.contains('invalid') ||
           errorMessage.contains('expired')) {
         AppMessaging.showInfo(
             'This confirmation link has already been used or has expired.');
-        setState(() {
-          _isConfirming = false;
-          _isSuccess = true; // Show success state even for already used tokens
-        });
+
+        if (mounted) {
+          setState(() {
+            _isConfirming = false;
+            _isSuccess =
+                true; // Show success state even for already used tokens
+          });
+        }
 
         // Navigate to login screen
         Future.delayed(const Duration(seconds: 2), () {
@@ -86,11 +102,26 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
           }
         });
       } else {
+        // For any other error, show the error but still navigate to login
+        // because if the user can log in, the email is already confirmed
         AppMessaging.showError('Failed to confirm email. Please try again.');
-        setState(() {
-          _isConfirming = false;
-          _isError = true;
-          _errorMessage = error.toString();
+
+        if (mounted) {
+          setState(() {
+            _isConfirming = false;
+            _isError = true;
+            _errorMessage = error.toString();
+          });
+        }
+
+        // Still navigate to login screen after a delay
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+              (route) => false,
+            );
+          }
         });
       }
     }
@@ -141,7 +172,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
         title: Text(
           'Email Confirmation',
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color:
@@ -167,7 +198,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                 Text(
                   'Email Confirmed!',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: isDark
@@ -180,7 +211,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                 Text(
                   'Your email has been successfully confirmed. You can now use all features of the app.',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 16,
                     color: isDark
                         ? AppColors.darkMutedForeground
@@ -205,7 +236,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                     child: const Text(
                       'Continue',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -223,7 +254,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                 Text(
                   'Confirmation Failed',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: isDark
@@ -237,7 +268,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                   _errorMessage ??
                       'Failed to confirm your email. Please try again.',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 16,
                     color: isDark
                         ? AppColors.darkMutedForeground
@@ -296,7 +327,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                 Text(
                   _isConfirming ? 'Confirming Email...' : 'Email Confirmation',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: isDark
@@ -311,7 +342,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                       ? 'Please wait while we confirm your email address...'
                       : 'We\'ve sent a confirmation email to your inbox. Please check your email and click the confirmation link.',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 16,
                     color: isDark
                         ? AppColors.darkMutedForeground
@@ -344,7 +375,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                       child: const Text(
                         'Resend Confirmation Email',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -373,7 +404,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                       child: const Text(
                         'Back',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),

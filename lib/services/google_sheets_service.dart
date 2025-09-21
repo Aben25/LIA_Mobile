@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../utils/network_error_handler.dart';
 
 class DonationRecord {
   final String id;
@@ -270,6 +271,11 @@ class GoogleSheetsService {
       return donations;
     } catch (error) {
       print('Error fetching donations: $error');
+      // If it's a network error, throw a user-friendly message
+      if (NetworkErrorHandler.isNetworkError(error)) {
+        throw Exception(NetworkErrorHandler.getNetworkErrorMessage(error));
+      }
+      // Re-throw other errors as-is
       rethrow;
     }
   }
@@ -307,6 +313,11 @@ class GoogleSheetsService {
       return true;
     } catch (error) {
       print('Error submitting donation: $error');
+      // If it's a network error, show user-friendly message
+      if (NetworkErrorHandler.isNetworkError(error)) {
+        print(
+            'Network error: ${NetworkErrorHandler.getNetworkErrorMessage(error)}');
+      }
       return false;
     }
   }

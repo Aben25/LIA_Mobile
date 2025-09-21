@@ -131,7 +131,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         title: Text(
           'Change Password',
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color:
@@ -174,7 +174,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             Text(
                               'Password Policy',
                               style: TextStyle(
-                                fontFamily: 'Poppins',
+                                fontFamily: 'Specify',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
@@ -186,7 +186,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         Text(
                           PasswordValidator.getPasswordPolicyDescription(),
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             fontSize: 14,
                             color: AppColors.primary,
                           ),
@@ -201,7 +201,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   Text(
                     'Current Password',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: isDark
@@ -295,7 +295,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   Text(
                     'New Password',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: isDark
@@ -421,7 +421,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     ? 'Password is strong'
                                     : 'Password needs improvement',
                                 style: TextStyle(
-                                  fontFamily: 'Poppins',
+                                  fontFamily: 'Specify',
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   color: _passwordValidation!.isValid
@@ -441,7 +441,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                       child: Text(
                                         '• $error',
                                         style: TextStyle(
-                                          fontFamily: 'Poppins',
+                                          fontFamily: 'Specify',
                                           fontSize: 11,
                                           color: Colors.orange,
                                         ),
@@ -458,7 +458,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   Text(
                     'Confirm New Password',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: isDark
@@ -569,7 +569,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       child: const Text(
                         'Change Password',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -588,7 +588,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   Text(
                     'Password Changed',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: isDark
@@ -601,7 +601,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   Text(
                     'Your password has been changed successfully. Please use your new password to sign in.',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       color: isDark
                           ? AppColors.darkMutedForeground
@@ -626,7 +626,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       child: const Text(
                         'Done',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),

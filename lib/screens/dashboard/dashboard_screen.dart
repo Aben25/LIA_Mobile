@@ -6,8 +6,10 @@ import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
 import '../children/children_detail_screen.dart';
 import '../../services/dashboard_service.dart';
+import '../../services/sponsorship_service.dart';
 import '../../models/child.dart';
 import '../../constants/api_endpoints.dart';
+import '../../components/webview_donation.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,14 +20,19 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final DashboardService _service = DashboardService();
+  final SponsorshipService _sponsorshipService = SponsorshipService();
   List<Child> _children = [];
   bool _loading = true;
   bool _refreshing = false;
   String? _error;
+  bool _showSponsorshipWebView = false;
+  UserSponsorshipStatus _sponsorshipStatus = UserSponsorshipStatus.newUser;
 
   @override
   void initState() {
     super.initState();
+    debugPrint(
+        '🎯 [Dashboard] initState() called - _showSponsorshipWebView: $_showSponsorshipWebView');
     _fetchChildren();
   }
 
@@ -44,10 +51,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
         throw Exception('User not authenticated');
       }
 
-      final children = await _service.getChildrenForUser(jwt: jwt);
+      // Fetch both children and sponsorship status in parallel
+      final results = await Future.wait([
+        _service.getChildrenForUser(jwt: jwt),
+        _sponsorshipService.getUserSponsorshipStatus(jwt: jwt),
+      ]);
+
+      final children = results[0] as List<Child>;
+      final sponsorshipStatus = results[1] as UserSponsorshipStatus;
 
       setState(() {
         _children = children;
+        _sponsorshipStatus = sponsorshipStatus;
         _loading = false;
       });
     } catch (error) {
@@ -73,6 +88,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _refreshing = false;
       });
     }
+  }
+
+  void _openSponsorshipWebView() {
+    debugPrint('🎯 [Dashboard] Sponsorship button pressed!');
+    debugPrint('🎯 [Dashboard] User sponsorship status: $_sponsorshipStatus');
+
+    // Check if user should be able to sponsor
+    if (!_sponsorshipService.shouldShowSponsorshipButton(_sponsorshipStatus)) {
+      EasyLoadingConfig.showError(
+          'You have a pending sponsorship request. Please wait for it to be processed.');
+      return;
+    }
+
+    setState(() {
+      _showSponsorshipWebView = true;
+    });
+
+    debugPrint(
+        '🎯 [Dashboard] Opening sponsorship WebView for status: $_sponsorshipStatus');
   }
 
   int _calculateAge(String? dateOfBirth) {
@@ -103,7 +137,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Text(
             'Welcome Back!',
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color:
@@ -114,7 +148,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Text(
             'Here are the children you\'re helping to support',
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 16,
               color: isDark
                   ? AppColors.darkMutedForeground
@@ -213,7 +247,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Text(
                       child.fullName ?? 'Unknown Name',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: isDark
@@ -225,7 +259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Text(
                       '${_calculateAge(child.dateOfBirth?.toIso8601String())} years old • ${child.location ?? 'Unknown Location'}',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 14,
                         color: isDark
                             ? AppColors.darkMutedForeground
@@ -238,7 +272,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child.aspiration ??
                           'No description available',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 14,
                         color: isDark
                             ? AppColors.darkForeground
@@ -287,7 +321,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   //           Text(
   //             'No Sponsored Children Yet',
   //             style: TextStyle(
-  //               fontFamily: 'Poppins',
+  //               fontFamily: 'Specify',
   //               fontSize: 24,
   //               fontWeight: FontWeight.bold,
   //               color: isDark
@@ -299,7 +333,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   //           Text(
   //             'You haven\'t been assigned any sponsored children yet. This usually happens for new users or when your account is still being set up.',
   //             style: TextStyle(
-  //               fontFamily: 'Poppins',
+  //               fontFamily: 'Specify',
   //               fontSize: 16,
   //               color: isDark
   //                   ? AppColors.darkMutedForeground
@@ -324,7 +358,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   //             child: const Text(
   //               'Start Sponsoring',
   //               style: TextStyle(
-  //                 fontFamily: 'Poppins',
+  //                 fontFamily: 'Specify',
   //                 fontSize: 16,
   //                 fontWeight: FontWeight.w600,
   //               ),
@@ -358,7 +392,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 'No Sponsored Children Yet',
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: isDark
@@ -371,7 +405,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 'You haven\'t been assigned any sponsored children yet. This usually happens for new users or when your account is still being set up.',
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 16,
                   color: isDark
                       ? AppColors.darkMutedForeground
@@ -381,10 +415,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () {
-                  EasyLoadingConfig.showToast(
-                      'Sponsorship feature coming soon!');
-                },
+                onPressed: _sponsorshipService
+                        .shouldShowSponsorshipButton(_sponsorshipStatus)
+                    ? () {
+                        debugPrint(
+                            '🎯 [Dashboard] Sponsorship button onPressed triggered');
+                        _openSponsorshipWebView();
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -394,12 +432,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
-                child: const Text(
-                  'Start Sponsoring',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
+                child: Text(
+                  _sponsorshipService.getButtonText(_sponsorshipStatus),
+                  style: const TextStyle(
+                    fontFamily: 'Specify',
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -429,7 +467,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(
               'Something went wrong',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: isDark
@@ -441,7 +479,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(
               _error ?? 'An unexpected error occurred',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 16,
                 color: isDark
                     ? AppColors.darkMutedForeground
@@ -464,7 +502,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const Text(
                 'Try Again',
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -478,42 +516,77 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: _onRefresh,
-      child: CustomScrollView(
-        slivers: [
-          // Header
-          SliverToBoxAdapter(
-            child: _buildHeader(),
-          ),
+    debugPrint(
+        '🎯 [Dashboard] build() called - _showSponsorshipWebView: $_showSponsorshipWebView');
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: CustomScrollView(
+            slivers: [
+              // Header
+              SliverToBoxAdapter(
+                child: _buildHeader(),
+              ),
 
-          // Content
-          if (_loading)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            )
-          else if (_error != null)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: _buildErrorState(),
-            )
-          else if (_children.isEmpty)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: _buildEmptyState(),
-            )
-          else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildChildCard(_children[index]),
-                childCount: _children.length,
-              ),
-            ),
-        ],
-      ),
+              // Content
+              if (_loading)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              else if (_error != null)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _buildErrorState(),
+                )
+              else if (_children.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _buildEmptyState(),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _buildChildCard(_children[index]),
+                    childCount: _children.length,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        // Sponsorship WebView Modal
+        if (_showSponsorshipWebView) ...[
+          Builder(
+            builder: (context) {
+              debugPrint(
+                  '🎯 [Dashboard] Rendering WebView modal - _showSponsorshipWebView: $_showSponsorshipWebView');
+              return WebViewDonation(
+                url: _sponsorshipService.getZeffyFormUrl(_sponsorshipStatus),
+                title: _sponsorshipService.getButtonText(_sponsorshipStatus),
+                onClose: () {
+                  debugPrint('🎯 [Dashboard] WebView close button pressed');
+                  setState(() {
+                    _showSponsorshipWebView = false;
+                  });
+                  debugPrint(
+                      '🎯 [Dashboard] WebView closed - _showSponsorshipWebView: $_showSponsorshipWebView');
+                },
+              );
+            },
+          ),
+        ] else ...[
+          Builder(
+            builder: (context) {
+              debugPrint(
+                  '🎯 [Dashboard] WebView modal NOT rendering - _showSponsorshipWebView: $_showSponsorshipWebView');
+              return const SizedBox.shrink();
+            },
+          ),
+        ]
+      ],
     );
   }
 }

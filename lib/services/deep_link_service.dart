@@ -10,9 +10,17 @@ class DeepLinkService {
   final AppLinks _appLinks = AppLinks();
   String? _initialLink;
   bool _initialLinkProcessed = false;
+  bool _isInitialized = false; // Prevent multiple initialization
 
   /// Initialize the deep link service
   Future<void> initialize() async {
+    if (_isInitialized) {
+      debugPrint(
+          '🔗 [DeepLink] Deep link service already initialized, skipping...');
+      return;
+    }
+
+    _isInitialized = true;
     try {
       debugPrint('🔗 [DeepLink] Initializing deep link service...');
 
@@ -26,7 +34,7 @@ class DeepLinkService {
         debugPrint('🔗 [DeepLink] No initial link found');
       }
 
-      // Listen for incoming links while the app is running
+      // Listen for incoming links while the app is running (only set up once)
       _appLinks.uriLinkStream.listen(
         (Uri uri) {
           debugPrint(

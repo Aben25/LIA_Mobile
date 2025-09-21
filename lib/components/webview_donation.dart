@@ -5,11 +5,13 @@ import '../constants/app_colors.dart';
 class WebViewDonation extends StatefulWidget {
   final String url;
   final VoidCallback onClose;
+  final String? title;
 
   const WebViewDonation({
     super.key,
     required this.url,
     required this.onClose,
+    this.title,
   });
 
   @override
@@ -90,13 +92,13 @@ class _WebViewDonationState extends State<WebViewDonation> {
                   ),
                   const SizedBox(width: 16),
                   // Title
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Make a Donation',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
+                      widget.title ?? 'Make a Donation',
+                      style: const TextStyle(
+                        fontFamily: 'Specify',
                         fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: Colors.black87,
                       ),
                     ),
@@ -116,7 +118,7 @@ class _WebViewDonationState extends State<WebViewDonation> {
                       child: const Text(
                         'Done',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: Colors.white,
@@ -136,7 +138,7 @@ class _WebViewDonationState extends State<WebViewDonation> {
                 child: Text(
                   'Swipe down or tap X to close',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 12,
                     color: AppColors.primary,
                   ),
@@ -165,7 +167,7 @@ class _WebViewDonationState extends State<WebViewDonation> {
                             Text(
                               'Loading donation form...',
                               style: TextStyle(
-                                fontFamily: 'Poppins',
+                                fontFamily: 'Specify',
                                 fontSize: 16,
                                 color: Colors.black54,
                               ),
@@ -204,7 +206,7 @@ class _WebViewDonationState extends State<WebViewDonation> {
                   child: const Text(
                     'Close',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),

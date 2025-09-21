@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../models/strapi_auth_response.dart';
 import '../models/strapi_user.dart';
 import '../services/strapi_auth_service.dart';
+import '../utils/network_error_handler.dart';
 
 class StrapiAuthProvider extends ChangeNotifier {
   final StrapiAuthService _service = StrapiAuthService();
@@ -25,8 +26,12 @@ class StrapiAuthProvider extends ChangeNotifier {
         try {
           _user = await _service.getMe();
         } catch (e) {
-          // If token is invalid, clear it
-          debugPrint('❌ [STRAPI AUTH] Invalid token during init: $e');
+          // If token is invalid or network error, clear it
+          if (NetworkErrorHandler.isNetworkError(e)) {
+            debugPrint('❌ [STRAPI AUTH] Network error during init: $e');
+          } else {
+            debugPrint('❌ [STRAPI AUTH] Invalid token during init: $e');
+          }
           _jwt = null;
           _user = null;
         }
@@ -41,13 +46,17 @@ class StrapiAuthProvider extends ChangeNotifier {
   }
 
   Future<void> login(String emailOrUsername, String password) async {
-    final StrapiAuthResponse auth = await _service.login(
-      identifier: emailOrUsername,
-      password: password,
-    );
-    _jwt = auth.jwt;
-    _user = auth.user;
-    notifyListeners();
+    try {
+      final StrapiAuthResponse auth = await _service.login(
+        identifier: emailOrUsername,
+        password: password,
+      );
+      _jwt = auth.jwt;
+      _user = auth.user;
+      notifyListeners();
+    } catch (error) {
+      throw Exception(NetworkErrorHandler.getErrorMessage(error));
+    }
   }
 
   Future<void> getUser() async {
@@ -58,14 +67,18 @@ class StrapiAuthProvider extends ChangeNotifier {
 
   Future<void> register(String email, String password,
       {required String username}) async {
-    final StrapiAuthResponse auth = await _service.register(
-      email: email,
-      password: password,
-      username: username,
-    );
-    _jwt = auth.jwt;
-    _user = auth.user;
-    notifyListeners();
+    try {
+      final StrapiAuthResponse auth = await _service.register(
+        email: email,
+        password: password,
+        username: username,
+      );
+      _jwt = auth.jwt;
+      _user = auth.user;
+      notifyListeners();
+    } catch (error) {
+      throw Exception(NetworkErrorHandler.getErrorMessage(error));
+    }
   }
 
   Future<void> logout() async {

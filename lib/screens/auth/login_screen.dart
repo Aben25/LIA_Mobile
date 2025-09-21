@@ -97,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Welcome Back',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: isDark
@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Sign in to continue making a difference',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 16,
                     color: isDark
                         ? AppColors.darkMutedForeground
@@ -126,8 +126,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    labelText: 'Email or Username',
-                    hintText: 'Enter your email or username',
+                    labelText: 'Username',
+                    hintText: 'Enter your username',
                     prefixIcon: Icon(
                       Icons.email_outlined,
                       color: isDark
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your email or username';
+                      return 'Please enter your username';
                     }
                     return null;
                   },
@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Forgot Password?',
                       style: TextStyle(
                         color: AppColors.primary,
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                       ),
                     ),
                   ),
@@ -227,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text(
                       'Sign In',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -244,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       "Don't have an account? ",
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         color: isDark
                             ? AppColors.darkMutedForeground
                             : AppColors.lightMutedForeground,
@@ -261,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'Sign Up',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
                         ),

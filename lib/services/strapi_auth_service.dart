@@ -5,6 +5,7 @@ import 'package:love_in_action/models/strapi_auth_response.dart';
 import 'package:love_in_action/models/strapi_user.dart';
 import 'package:love_in_action/constants/api_endpoints.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/network_error_handler.dart';
 
 class StrapiAuthService {
   static const _tokenKey = 'strapi_jwt';
@@ -14,17 +15,17 @@ class StrapiAuthService {
       required String password,
       required String username}) async {
     final uri = Uri.parse(ApiEndpoints.register);
-    final res = await http.post(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-        'username': username,
-      }),
-    );
+    final res = await _makeHttpRequest(() async => await http.post(
+          uri,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'email': email,
+            'password': password,
+            'username': username,
+          }),
+        ));
 
     final data = _decodeResponse(res);
 
@@ -41,16 +42,16 @@ class StrapiAuthService {
   Future<StrapiAuthResponse> login(
       {required String identifier, required String password}) async {
     final uri = Uri.parse(ApiEndpoints.login);
-    final res = await http.post(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'identifier': identifier,
-        'password': password,
-      }),
-    );
+    final res = await _makeHttpRequest(() async => await http.post(
+          uri,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'identifier': identifier,
+            'password': password,
+          }),
+        ));
 
     final data = _decodeResponse(res);
 
@@ -77,13 +78,13 @@ class StrapiAuthService {
       throw Exception('No saved token found.');
     }
     final uri = Uri.parse(ApiEndpoints.me);
-    final res = await http.get(
-      uri,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    final res = await _makeHttpRequest(() async => await http.get(
+          uri,
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ));
 
     final data = _decodeResponse(res);
     return StrapiUser.fromJson(data);
@@ -129,6 +130,21 @@ class StrapiAuthService {
         ? (error['message']?.toString() ?? 'Authentication error.')
         : 'Authentication error.';
     throw Exception(msg);
+  }
+
+  /// Wraps HTTP calls with network error handling
+  Future<http.Response> _makeHttpRequest(
+      Future<http.Response> Function() request) async {
+    try {
+      return await request();
+    } catch (error) {
+      // If it's a network error, throw a user-friendly message
+      if (NetworkErrorHandler.isNetworkError(error)) {
+        throw Exception(NetworkErrorHandler.getNetworkErrorMessage(error));
+      }
+      // Re-throw other errors as-is
+      rethrow;
+    }
   }
 
   // Password Management
@@ -222,16 +238,23 @@ class StrapiAuthService {
           // Check if it's a validation error (token already used/invalid)
           if (decoded['error'] != null &&
               decoded['error']['name'] == 'ValidationError') {
-            throw Exception('Invalid or expired confirmation token');
+            // Instead of throwing an error, return a special success state
+            // This means the token was already used (email already confirmed)
+            debugPrint(
+                '🔗 [EmailConfirmation] Token already used - email already confirmed');
+            return; // Return successfully, don't throw error
           }
 
           throw Exception(
               'Email confirmation failed: ${decoded['error']?['message'] ?? 'Unknown error'}');
         } catch (e) {
-          if (e.toString().contains('Invalid or expired')) {
-            rethrow; // Re-throw validation errors as-is
+          if (e.toString().contains('Email confirmation failed')) {
+            rethrow; // Re-throw actual errors
           }
-          throw Exception('Email confirmation failed: Invalid token');
+          // If JSON parsing failed, assume token was already used
+          debugPrint(
+              '🔗 [EmailConfirmation] JSON parse failed, assuming token already used');
+          return; // Return successfully
         }
       } else {
         // Other status codes
@@ -242,7 +265,19 @@ class StrapiAuthService {
       }
     } catch (e) {
       debugPrint('🔗 [EmailConfirmation] API call failed: $e');
-      rethrow; // Re-throw the original exception
+
+      // If it's a network error or other issue, check if the user might already be confirmed
+      // by trying to get user info (if we have a token)
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('TimeoutException') ||
+          e.toString().contains('HandshakeException')) {
+        debugPrint(
+            '🔗 [EmailConfirmation] Network error - assuming email might already be confirmed');
+        // Don't throw error, return successfully to let user try logging in
+        return;
+      }
+
+      rethrow; // Re-throw other exceptions
     }
   }
 

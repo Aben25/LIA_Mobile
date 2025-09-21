@@ -150,7 +150,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   Text(
                     'Reset Password',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: isDark
@@ -166,7 +166,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   Text(
                     'Enter your new password below.',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       color: isDark
                           ? AppColors.darkMutedForeground
@@ -181,7 +181,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   Text(
                     'Reset Code',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: isDark
@@ -267,7 +267,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   Text(
                     'New Password',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: isDark
@@ -360,7 +360,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   Text(
                     'Confirm New Password',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: isDark
@@ -463,7 +463,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       child: const Text(
                         'Update Password',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -485,7 +485,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   Text(
                     'Password Updated',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: isDark
@@ -500,7 +500,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   Text(
                     'Your password has been updated successfully. You can now sign in with your new password.',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       color: isDark
                           ? AppColors.darkMutedForeground
@@ -533,7 +533,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       child: const Text(
                         'Go to Sign In',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),

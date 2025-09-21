@@ -69,7 +69,7 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
         title: Text(
           '${widget.childName}\'s Gallery',
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color:
@@ -80,7 +80,7 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
           Text(
             '${_currentIndex + 1}/${widget.galleryMedia.length}',
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 16,
               color: isDark
                   ? AppColors.darkMutedForeground
@@ -122,7 +122,7 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
                         Text(
                           'Image not available',
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             fontSize: 18,
                             color: isDark
                                 ? AppColors.darkMutedForeground
@@ -158,7 +158,7 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
                               Text(
                                 'Failed to load image',
                                 style: TextStyle(
-                                  fontFamily: 'Poppins',
+                                  fontFamily: 'Specify',
                                   fontSize: 18,
                                   color: isDark
                                       ? AppColors.darkMutedForeground
@@ -200,7 +200,7 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
               child: Text(
                 widget.galleryMedia[_currentIndex]['caption'].toString(),
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 16,
                   color: isDark
                       ? AppColors.darkForeground

@@ -4,6 +4,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
+import '../../utils/network_error_handler.dart';
 import '../../services/google_sheets_service.dart';
 
 class DonationsScreen extends StatefulWidget {
@@ -91,10 +92,10 @@ class _DonationsScreenState extends State<DonationsScreen> {
     } catch (error) {
       if (mounted) {
         setState(() {
-          _error = error.toString();
+          _error = NetworkErrorHandler.getErrorMessage(error);
           _loading = false;
         });
-        EasyLoadingConfig.showError('Failed to load donations');
+        EasyLoadingConfig.showError(NetworkErrorHandler.getErrorMessage(error));
       }
     }
   }
@@ -158,7 +159,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                 Text(
                   '\$${donation.amount.toStringAsFixed(2)}',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
@@ -174,7 +175,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                   child: Text(
                     donation.status,
                     style: const TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Colors.white,
@@ -209,7 +210,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                     Text(
                       donation.date,
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 14,
                         color: isDark
                             ? AppColors.darkMutedForeground
@@ -235,7 +236,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                       Text(
                         donation.project,
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 14,
                           color: isDark
                               ? AppColors.darkMutedForeground
@@ -262,7 +263,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                       Text(
                         donation.paymentMethod!,
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 14,
                           color: isDark
                               ? AppColors.darkMutedForeground
@@ -291,7 +292,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                         child: Text(
                           donation.notes!,
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             fontSize: 14,
                             color: isDark
                                 ? AppColors.darkMutedForeground
@@ -327,7 +328,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
             Text(
               'Something went wrong',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: isDark
@@ -339,7 +340,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
             Text(
               _error ?? 'An unexpected error occurred',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 color: isDark
                     ? AppColors.darkMutedForeground
                     : AppColors.lightMutedForeground,
@@ -371,7 +372,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
           Text(
             'No donations found for your account',
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color:
@@ -383,7 +384,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
           Text(
             'Your generous contributions will appear here once you make a donation',
             style: TextStyle(
-              fontFamily: 'Poppins',
+              fontFamily: 'Specify',
               fontSize: 16,
               color: isDark
                   ? AppColors.darkMutedForeground
@@ -417,7 +418,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                     Text(
                       'My Donations',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: isDark
@@ -463,7 +464,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                           Text(
                             'Your Donations',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 14,
                               color: isDark
                                   ? AppColors.darkMutedForeground
@@ -474,7 +475,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                           Text(
                             '\$${_totalAmount.toStringAsFixed(2)}',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 36,
                               fontWeight: FontWeight.bold,
                               color: isDark
@@ -486,7 +487,7 @@ class _DonationsScreenState extends State<DonationsScreen> {
                           Text(
                             '${_userDonations.length} ${_userDonations.length == 1 ? 'donation' : 'donations'}',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 14,
                               color: isDark
                                   ? AppColors.darkMutedForeground

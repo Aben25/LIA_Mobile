@@ -184,9 +184,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: isDark
                           ? AppColors.darkForeground
                           : AppColors.lightForeground,
@@ -199,7 +199,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             Text(
               content,
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 16,
                 color: isDark
                     ? AppColors.darkMutedForeground
@@ -268,9 +268,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   //                 child: Text(
   //                   'Project Gallery',
   //                   style: TextStyle(
-  //                     fontFamily: 'Poppins',
+  //                     fontFamily: 'Specify',
   //                     fontSize: 18,
-  //                     fontWeight: FontWeight.w600,
+  //                     fontWeight: FontWeight.w500,
   //                     color: isDark
   //                         ? AppColors.darkForeground
   //                         : AppColors.lightForeground,
@@ -352,7 +352,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   //                         Text(
   //                           media['caption'].toString(),
   //                           style: TextStyle(
-  //                             fontFamily: 'Poppins',
+  //                             fontFamily: 'Specify',
   //                             fontSize: 12,
   //                             color: isDark
   //                                 ? AppColors.darkMutedForeground
@@ -417,9 +417,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               Text(
                 'Could not find the project\'s information',
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: isDark
                       ? AppColors.darkForeground
                       : AppColors.lightForeground,
@@ -460,9 +460,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             title: Text(
               'Project Details',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 18,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: isDark
                     ? AppColors.darkForeground
                     : AppColors.lightForeground,
@@ -529,7 +529,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                         child: Text(
                           project.category ?? 'Project',
                           style: TextStyle(
-                            fontFamily: 'Poppins',
+                            fontFamily: 'Specify',
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: AppColors.primary,
@@ -541,7 +541,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       Text(
                         projectTitle,
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: isDark
@@ -565,7 +565,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                           Text(
                             'Last updated: ${_formatDate(project.updatedAt.toString())}',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 14,
                               color: isDark
                                   ? AppColors.darkMutedForeground
@@ -615,9 +615,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                       child: Text(
                                         project.blogLink!.heading!,
                                         style: TextStyle(
-                                          fontFamily: 'Poppins',
+                                          fontFamily: 'Specify',
                                           fontSize: 18,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w500,
                                           color: isDark
                                               ? AppColors.darkForeground
                                               : AppColors.lightForeground,
@@ -633,7 +633,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                 Text(
                                   project.blogLink!.subHeading!,
                                   style: TextStyle(
-                                    fontFamily: 'Poppins',
+                                    fontFamily: 'Specify',
                                     fontSize: 16,
                                     color: isDark
                                         ? AppColors.darkMutedForeground
@@ -654,7 +654,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                       return Text(
                                         text,
                                         style: TextStyle(
-                                          fontFamily: 'Poppins',
+                                          fontFamily: 'Specify',
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                           color: isDark
@@ -672,7 +672,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                         child: Text(
                                           text,
                                           style: TextStyle(
-                                            fontFamily: 'Poppins',
+                                            fontFamily: 'Specify',
                                             fontSize: 16,
                                             color: isDark
                                                 ? AppColors.darkMutedForeground
@@ -735,9 +735,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       //               child: Text(
                       //                 'Project Goal',
                       //                 style: TextStyle(
-                      //                   fontFamily: 'Poppins',
+                      //                   fontFamily: 'Specify',
                       //                   fontSize: 18,
-                      //                   fontWeight: FontWeight.w600,
+                      //                   fontWeight: FontWeight.w500,
                       //                   color: isDark
                       //                       ? AppColors.darkForeground
                       //                       : AppColors.lightForeground,
@@ -750,7 +750,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       //         Text(
                       //           project['goal'],
                       //           style: TextStyle(
-                      //             fontFamily: 'Poppins',
+                      //             fontFamily: 'Specify',
                       //             fontSize: 16,
                       //             color: isDark
                       //                 ? AppColors.darkMutedForeground
@@ -797,9 +797,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       //               child: Text(
                       //                 'Expected Impact',
                       //                 style: TextStyle(
-                      //                   fontFamily: 'Poppins',
+                      //                   fontFamily: 'Specify',
                       //                   fontSize: 18,
-                      //                   fontWeight: FontWeight.w600,
+                      //                   fontWeight: FontWeight.w500,
                       //                   color: isDark
                       //                       ? AppColors.darkForeground
                       //                       : AppColors.lightForeground,
@@ -812,7 +812,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       //         Text(
                       //           project['impact'],
                       //           style: TextStyle(
-                      //             fontFamily: 'Poppins',
+                      //             fontFamily: 'Specify',
                       //             fontSize: 16,
                       //             color: isDark
                       //                 ? AppColors.darkMutedForeground
@@ -843,9 +843,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                           child: Text(
                             'Support This Project',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -898,6 +898,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           WebViewDonation(
             url:
                 'https://www.zeffy.com/donation-form/make-a-one-time-donation-for-your-sponsee',
+            title: 'Make a Donation',
             onClose: () {
               setState(() {
                 _showDonationWebView = false;

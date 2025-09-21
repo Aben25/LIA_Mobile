@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../constants/api_endpoints.dart';
 import '../models/child.dart';
+import '../utils/network_error_handler.dart';
 
 class DashboardService {
   final http.Client _client;
@@ -14,28 +15,38 @@ class DashboardService {
     String url, {
     required String jwt,
   }) async {
-    // Debug: outgoing request
-    print('[DashboardService] GET => $url');
-    final res = await _client.get(
-      Uri.parse(url),
-      headers: {
-        'Authorization': 'Bearer $jwt',
-        'Content-Type': 'application/json',
-      },
-    );
+    try {
+      // Debug: outgoing request
+      print('[DashboardService] GET => $url');
+      final res = await _client.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $jwt',
+          'Content-Type': 'application/json',
+        },
+      );
 
-    // Debug: response status and small preview of body
-    print('[DashboardService] <-- ${res.statusCode} for $url');
-    if (res.body.isNotEmpty) {
-      final preview = res.body.length > 300 ? res.body.substring(0, 300) + '…' : res.body;
-      print('[DashboardService] Body preview: ' + preview);
+      // Debug: response status and small preview of body
+      print('[DashboardService] <-- ${res.statusCode} for $url');
+      if (res.body.isNotEmpty) {
+        final preview =
+            res.body.length > 300 ? res.body.substring(0, 300) + '…' : res.body;
+        print('[DashboardService] Body preview: ' + preview);
+      }
+
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        throw Exception('Request failed (${res.statusCode}): ${res.body}');
+      }
+
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    } catch (error) {
+      // If it's a network error, throw a user-friendly message
+      if (NetworkErrorHandler.isNetworkError(error)) {
+        throw Exception(NetworkErrorHandler.getNetworkErrorMessage(error));
+      }
+      // Re-throw other errors as-is
+      rethrow;
     }
-
-    if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw Exception('Request failed (${res.statusCode}): ${res.body}');
-    }
-
-    return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
   Future<Map<String, dynamic>> getMe({required String jwt}) async {
@@ -84,7 +95,8 @@ class DashboardService {
       try {
         print('[DashboardService] Trying sponsors URL: $url');
         sponsorsRes = await _getJson(url, jwt: jwt);
-        print('[DashboardService] Sponsors response keys: ' + sponsorsRes.keys.join(','));
+        print('[DashboardService] Sponsors response keys: ' +
+            sponsorsRes.keys.join(','));
         break;
       } catch (e) {
         print('[DashboardService] Sponsors URL failed: $url => $e');
@@ -93,7 +105,8 @@ class DashboardService {
     }
 
     if (sponsorsRes == null) {
-      print('[DashboardService] All sponsors URLs failed. Falling back to /children by sponsor.email');
+      print(
+          '[DashboardService] All sponsors URLs failed. Falling back to /children by sponsor.email');
       return await _fallbackChildrenBySponsorEmail(jwt: jwt, email: email);
     }
 
@@ -134,7 +147,8 @@ class DashboardService {
       childrenItems = childrenNode;
     }
 
-    print('[DashboardService] Children items raw count: ${childrenItems.length}');
+    print(
+        '[DashboardService] Children items raw count: ${childrenItems.length}');
     if (childrenItems.isEmpty) {
       // Sponsor exists but children not populated; fallback direct query
       return await _fallbackChildrenBySponsorEmail(jwt: jwt, email: email);
@@ -152,15 +166,18 @@ class DashboardService {
             ...attrs,
           };
           children.add(Child.fromJson(merged));
-          print('[DashboardService] Parsed child (attributes) id=$id name=${merged['fullName']}');
+          print(
+              '[DashboardService] Parsed child (attributes) id=$id name=${merged['fullName']}');
         } else {
           children.add(Child.fromJson(item));
-          print('[DashboardService] Parsed child (flat) id=${item['id']} name=${item['fullName']}');
+          print(
+              '[DashboardService] Parsed child (flat) id=${item['id']} name=${item['fullName']}');
         }
       }
     }
 
-    print('[DashboardService] getChildrenForUser() done. Parsed children: ${children.length}');
+    print(
+        '[DashboardService] getChildrenForUser() done. Parsed children: ${children.length}');
     return children;
   }
 
@@ -169,7 +186,8 @@ class DashboardService {
     required String email,
   }) async {
     try {
-      final url = '${ApiEndpoints.children}?filters[sponsor][email][\$eq]=$email&populate=images';
+      final url =
+          '${ApiEndpoints.children}?filters[sponsor][email][\$eq]=$email&populate=images';
       print('[DashboardService] Fallback children URL: $url');
       final res = await _getJson(url, jwt: jwt);
       final data = res['data'];

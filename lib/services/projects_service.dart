@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../constants/api_endpoints.dart';
 import '../models/cause.dart';
 import '../models/project.dart';
+import '../utils/network_error_handler.dart';
 
 class ProjectsService {
   final http.Client _client;
@@ -12,18 +13,28 @@ class ProjectsService {
   ProjectsService({http.Client? client}) : _client = client ?? http.Client();
 
   Future<Map<String, dynamic>> _getJson(String url) async {
-    final res = await _client.get(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    );
+    try {
+      final res = await _client.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw Exception('ProjectsService error (${res.statusCode}): ${res.body}');
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        throw Exception(
+            'ProjectsService error (${res.statusCode}): ${res.body}');
+      }
+
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    } catch (error) {
+      // If it's a network error, throw a user-friendly message
+      if (NetworkErrorHandler.isNetworkError(error)) {
+        throw Exception(NetworkErrorHandler.getNetworkErrorMessage(error));
+      }
+      // Re-throw other errors as-is
+      rethrow;
     }
-
-    return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
   Future<List<Cause>> getCauses() async {

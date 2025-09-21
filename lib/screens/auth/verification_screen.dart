@@ -26,7 +26,7 @@ class VerificationScreen extends StatelessWidget {
             const Text(
               'Check your inbox',
               style: TextStyle(
-                fontFamily: 'Poppins',
+                fontFamily: 'Specify',
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
               ),
@@ -35,7 +35,7 @@ class VerificationScreen extends StatelessWidget {
             Text(
               'We sent a verification link to ${auth.user?.email ?? 'your email'}.'
               ' Please verify your email, then tap "I verified" below.',
-              style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
+              style: const TextStyle(fontFamily: 'Specify', fontSize: 14),
             ),
             const SizedBox(height: 24),
             Row(
@@ -62,7 +62,7 @@ class VerificationScreen extends StatelessWidget {
                     ),
                     child: const Text(
                       'Resend Email',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 16),
+                      style: TextStyle(fontFamily: 'Specify', fontSize: 16),
                     ),
                   ),
                 ),
@@ -93,7 +93,7 @@ class VerificationScreen extends StatelessWidget {
                     ),
                     child: const Text(
                       'I Verified',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 16),
+                      style: TextStyle(fontFamily: 'Specify', fontSize: 16),
                     ),
                   ),
                 ),
@@ -107,7 +107,7 @@ class VerificationScreen extends StatelessWidget {
                 },
                 child: const Text(
                   'Sign out',
-                  style: TextStyle(fontFamily: 'Poppins', color: AppColors.primary),
+                  style: TextStyle(fontFamily: 'Specify', color: AppColors.primary),
                 ),
               ),
             ),

@@ -4,6 +4,7 @@ import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/app_messaging.dart';
+import '../welcome_screen.dart';
 
 class DeleteAccountScreen extends StatefulWidget {
   const DeleteAccountScreen({super.key});
@@ -48,8 +49,8 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       AppMessaging.showSuccess('Account deleted successfully');
 
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/welcome',
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
           (route) => false,
         );
       }
@@ -88,7 +89,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         title: Text(
           'Delete Account',
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'Specify',
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color:
@@ -127,7 +128,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                       Text(
                         'Delete Account',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.red,
@@ -138,7 +139,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                       Text(
                         'This action cannot be undone. All your data will be permanently deleted.',
                         style: TextStyle(
-                          fontFamily: 'Poppins',
+                          fontFamily: 'Specify',
                           fontSize: 16,
                           color: isDark
                               ? AppColors.darkForeground
@@ -156,7 +157,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                 Text(
                   'What will be deleted:',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: isDark
@@ -200,7 +201,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                 Text(
                   'To confirm deletion, type the following phrase:',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
+                    fontFamily: 'Specify',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: isDark
@@ -225,7 +226,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                   child: Text(
                     '"$_requiredPhrase"',
                     style: TextStyle(
-                      fontFamily: 'Poppins',
+                      fontFamily: 'Specify',
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.red,
@@ -316,7 +317,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                         : const Text(
                             'Delete My Account',
                             style: TextStyle(
-                              fontFamily: 'Poppins',
+                              fontFamily: 'Specify',
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -349,7 +350,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                     child: const Text(
                       'Cancel',
                       style: TextStyle(
-                        fontFamily: 'Poppins',
+                        fontFamily: 'Specify',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -393,7 +394,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               Text(
                 title,
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: isDark
@@ -405,7 +406,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               Text(
                 description,
                 style: TextStyle(
-                  fontFamily: 'Poppins',
+                  fontFamily: 'Specify',
                   fontSize: 12,
                   color: isDark
                       ? AppColors.darkMutedForeground
