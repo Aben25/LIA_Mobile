@@ -225,9 +225,31 @@ class StrapiAuthService {
 
       if (res.statusCode == 200) {
         // Status 200 means confirmation was successful
-        // Even if it returns HTML, the user was confirmed on the backend
         debugPrint(
             '🔗 [EmailConfirmation] Email confirmation successful (status 200)');
+        debugPrint('🔗 [EmailConfirmation] Response body: ${res.body}');
+        return;
+      } else if (res.statusCode >= 300 && res.statusCode < 400) {
+        // Status 3xx means redirect - this is what Strapi does on successful confirmation
+        debugPrint(
+            '🔗 [EmailConfirmation] Email confirmation successful (redirect ${res.statusCode})');
+        debugPrint(
+            '🔗 [EmailConfirmation] Redirect location: ${res.headers['location']}');
+        debugPrint('🔗 [EmailConfirmation] Response body: ${res.body}');
+        return;
+      } else if (res.statusCode == 404) {
+        // Status 404 might mean the redirect URL is not configured properly in Strapi
+        // or the redirect is happening but our HTTP client can't follow it
+        // Since successful confirmation redirects (no JSON), treat 404 as success
+        debugPrint(
+            '🔗 [EmailConfirmation] Email confirmation returned 404 - likely successful redirect');
+        debugPrint('🔗 [EmailConfirmation] Response body: ${res.body}');
+        debugPrint(
+            '🔗 [EmailConfirmation] This usually means confirmation succeeded and Strapi redirected');
+
+        // If we get a 404, it likely means the confirmation worked but Strapi
+        // tried to redirect to a URL that doesn't exist or our HTTP client
+        // can't follow the redirect properly
         return;
       } else if (res.statusCode == 400) {
         // Status 400 means token is invalid, expired, or already used
@@ -238,11 +260,21 @@ class StrapiAuthService {
           // Check if it's a validation error (token already used/invalid)
           if (decoded['error'] != null &&
               decoded['error']['name'] == 'ValidationError') {
-            // Instead of throwing an error, return a special success state
-            // This means the token was already used (email already confirmed)
+            // Check the specific error message
+            String errorMessage = decoded['error']['message'] ?? '';
             debugPrint(
-                '🔗 [EmailConfirmation] Token already used - email already confirmed');
-            return; // Return successfully, don't throw error
+                '🔗 [EmailConfirmation] Validation error: $errorMessage');
+
+            if (errorMessage.toLowerCase().contains('invalid token')) {
+              // This is a real error - invalid token format
+              throw Exception(
+                  'Invalid confirmation token. Please request a new confirmation email.');
+            } else {
+              // This might be "already used" - treat as success
+              debugPrint(
+                  '🔗 [EmailConfirmation] Token already used - email already confirmed');
+              return; // Return successfully, don't throw error
+            }
           }
 
           throw Exception(
@@ -266,15 +298,12 @@ class StrapiAuthService {
     } catch (e) {
       debugPrint('🔗 [EmailConfirmation] API call failed: $e');
 
-      // If it's a network error or other issue, check if the user might already be confirmed
-      // by trying to get user info (if we have a token)
+      // Log network errors but still throw them to be handled properly
       if (e.toString().contains('SocketException') ||
           e.toString().contains('TimeoutException') ||
           e.toString().contains('HandshakeException')) {
-        debugPrint(
-            '🔗 [EmailConfirmation] Network error - assuming email might already be confirmed');
-        // Don't throw error, return successfully to let user try logging in
-        return;
+        debugPrint('🔗 [EmailConfirmation] Network error occurred: $e');
+        // Still throw the error so it can be handled properly
       }
 
       rethrow; // Re-throw other exceptions

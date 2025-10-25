@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/supabase_provider.dart';
+import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
 import '../../utils/network_error_handler.dart';
+import '../../services/child_detail_service.dart';
 import 'full_gallery_screen.dart';
 
 class ChildrenDetailScreen extends StatefulWidget {
@@ -20,17 +21,18 @@ class ChildrenDetailScreen extends StatefulWidget {
 }
 
 class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
-  Map<String, dynamic>? _sponsee;
+  Map<String, dynamic>? _child;
   bool _loading = true;
   String? _error;
+  final ChildDetailService _service = ChildDetailService();
 
   @override
   void initState() {
     super.initState();
-    _fetchSponseeDetails();
+    _fetchChildDetails();
   }
 
-  Future<void> _fetchSponseeDetails() async {
+  Future<void> _fetchChildDetails() async {
     if (!mounted) return;
 
     try {
@@ -39,22 +41,33 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
         _error = null;
       });
 
-      // Commented out during Strapi transition
-      // final supabaseProvider =
-      //     Provider.of<SupabaseProvider>(context, listen: false);
-      // final supabase = supabaseProvider.supabase;
+      final auth = Provider.of<StrapiAuthProvider>(context, listen: false);
+      final jwt = auth.jwt;
+      if (jwt == null || jwt.isEmpty) {
+        throw Exception('User not authenticated');
+      }
 
-      print('🔍 [CHILDREN] Fetching sponsee details for ID: ${widget.childId}');
+      print('🔍 [CHILDREN] Fetching child details for ID: ${widget.childId}');
 
-      // TODO: Implement with Strapi API
-      // Simulate loading delay
-      await Future.delayed(const Duration(seconds: 1));
+      // Try to fetch child details using the service
+      Map<String, dynamic> childData;
+      try {
+        childData = await _service.getChildDetail(
+          childId: widget.childId,
+          jwt: jwt,
+        );
+      } catch (e) {
+        print('🔍 [CHILDREN] Primary method failed, trying filter method: $e');
+        childData = await _service.getChildDetailByFilter(
+          childId: widget.childId,
+          jwt: jwt,
+        );
+      }
 
       if (mounted) {
         setState(() {
+          _child = childData;
           _loading = false;
-          _error =
-              'Children details feature is temporarily unavailable during migration to Strapi';
         });
       }
     } catch (error) {
@@ -211,12 +224,12 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: (isDark ? AppColors.darkBackground : AppColors.lightBackground)
-              .withOpacity(0.9),
+              .withOpacity(0.6),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isDark
-                ? AppColors.darkMutedForeground
-                : AppColors.lightMutedForeground,
+                ? AppColors.darkMutedForeground.withOpacity(0.6)
+                : AppColors.lightMutedForeground.withOpacity(0.6),
             width: 1,
           ),
         ),
@@ -259,12 +272,32 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
   }
 
   Widget _buildGallerySection() {
-    if (_sponsee == null || _sponsee!['gallery'] == null)
-      return const SizedBox.shrink();
+    if (_child == null) return const SizedBox.shrink();
 
-    final gallery = _sponsee!['gallery'];
-    final galleryMedia =
-        List<Map<String, dynamic>>.from(gallery['gallery_media'] ?? []);
+    // Handle Strapi data structure - could be flat or with attributes
+    Map<String, dynamic> childData;
+    if (_child!.containsKey('attributes')) {
+      final id = _child!['id'];
+      final attrs = _child!['attributes'] as Map<String, dynamic>;
+      childData = {'id': id, ...attrs};
+    } else {
+      childData = _child!;
+    }
+
+    final images = childData['images'];
+    if (images == null) return const SizedBox.shrink();
+
+    // Convert images to gallery format
+    List<Map<String, dynamic>> galleryMedia = [];
+    if (images is List) {
+      for (final image in images) {
+        if (image is Map<String, dynamic>) {
+          galleryMedia.add(image);
+        }
+      }
+    } else if (images is Map<String, dynamic>) {
+      galleryMedia.add(images);
+    }
 
     if (galleryMedia.isEmpty) return const SizedBox.shrink();
 
@@ -360,19 +393,6 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                   ),
               ],
             ),
-            if (gallery['description'] != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                gallery['description'],
-                style: TextStyle(
-                  fontFamily: 'Specify',
-                  fontSize: 16,
-                  color: isDark
-                      ? AppColors.darkMutedForeground
-                      : AppColors.lightMutedForeground,
-                ),
-              ),
-            ],
             const SizedBox(height: 16),
             GridView.builder(
               shrinkWrap: true,
@@ -381,14 +401,22 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                 crossAxisCount: 2,
                 crossAxisSpacing: 4,
                 mainAxisSpacing: 4,
-                childAspectRatio: 0.7,
+                childAspectRatio: 0.6,
               ),
               itemCount: galleryMedia.length > 4 ? 4 : galleryMedia.length,
               itemBuilder: (context, index) {
                 final media = galleryMedia[index];
-                final filename = media['media']?['filename'];
 
-                if (filename == null) {
+                // Handle Strapi image structure
+                String? imageUrl;
+                final url = media['url'];
+                if (url != null) {
+                  imageUrl = url.startsWith('http')
+                      ? url
+                      : 'https://admin.loveinaction.co$url';
+                }
+
+                if (imageUrl == null) {
                   return Container(
                     decoration: BoxDecoration(
                       color: isDark
@@ -406,9 +434,6 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                   );
                 }
 
-                final imageUrl =
-                    'https://ntckmekstkqxqgigqzgn.supabase.co/storage/v1/object/public/Media/$filename';
-
                 return InkWell(
                   onTap: () {
                     _openFullGallery(galleryMedia, initialIndex: index);
@@ -420,6 +445,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                         child: Image.network(
                           imageUrl,
                           fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               decoration: BoxDecoration(
@@ -487,11 +513,24 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
 
   void _openFullGallery(List<Map<String, dynamic>> galleryMedia,
       {int initialIndex = 0}) {
+    // Get child name from current data
+    String childName = 'Child';
+    if (_child != null) {
+      Map<String, dynamic> childData;
+      if (_child!.containsKey('attributes')) {
+        final attrs = _child!['attributes'] as Map<String, dynamic>;
+        childData = attrs;
+      } else {
+        childData = _child!;
+      }
+      childName = childData['fullName'] ?? 'Child';
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => FullGalleryScreen(
           galleryMedia: galleryMedia,
-          childName: _sponsee?['full_name'] ?? 'Child',
+          childName: childName,
           initialIndex: initialIndex,
         ),
       ),
@@ -519,7 +558,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
       );
     }
 
-    if (_error != null || _sponsee == null) {
+    if (_error != null || _child == null) {
       return Scaffold(
         backgroundColor: Colors.transparent,
         body: Center(
@@ -546,7 +585,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: _fetchSponseeDetails,
+                onPressed: _fetchChildDetails,
                 child: const Text('Try Again'),
               ),
             ],
@@ -555,11 +594,43 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
       );
     }
 
-    final sponsee = _sponsee!;
-    final fullName = sponsee['full_name'] ?? 'Unknown';
-    final imageUrl = sponsee['media']?['filename'] != null
-        ? 'https://ntckmekstkqxqgigqzgn.supabase.co/storage/v1/object/public/Media/${sponsee['media']['filename']}'
-        : null;
+    final child = _child!;
+
+    // Handle Strapi data structure - could be flat or with attributes
+    Map<String, dynamic> childData;
+    if (child.containsKey('attributes')) {
+      final id = child['id'];
+      final attrs = child['attributes'] as Map<String, dynamic>;
+      childData = {'id': id, ...attrs};
+    } else {
+      childData = child;
+    }
+
+    final fullName = childData['fullName'] ?? 'Unknown';
+
+    // Handle images - could be single image or array
+    String? imageUrl;
+    final images = childData['images'];
+    if (images != null) {
+      if (images is List && images.isNotEmpty) {
+        final firstImage = images.first;
+        if (firstImage is Map<String, dynamic>) {
+          final url = firstImage['url'];
+          if (url != null) {
+            imageUrl = url.startsWith('http')
+                ? url
+                : 'https://admin.loveinaction.co$url';
+          }
+        }
+      } else if (images is Map<String, dynamic>) {
+        final url = images['url'];
+        if (url != null) {
+          imageUrl = url.startsWith('http')
+              ? url
+              : 'https://admin.loveinaction.co$url';
+        }
+      }
+    }
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -593,12 +664,13 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
               children: [
                 // Profile image
                 Container(
-                  height: 250,
+                  height: 400,
                   width: double.infinity,
                   child: imageUrl != null
                       ? Image.network(
                           imageUrl,
                           fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               color: isDark
@@ -638,22 +710,20 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                     child: Row(
                       children: [
                         _buildQuickInfoCard(
-                          label: 'Gender',
-                          value: (sponsee['gender'] ?? 'Unknown')
-                              .toString()
-                              .toUpperCase(),
-                          icon: Icons.person_outline,
+                          label: 'ID',
+                          value: childData['id']?.toString() ?? 'Unknown',
+                          icon: Icons.badge_outlined,
                         ),
                         _buildQuickInfoCard(
                           label: 'Age',
-                          value: _calculateAge(sponsee['date_of_birth'])
+                          value: _calculateAge(childData['dateOfBirth'])
                               .toString(),
                           icon: Icons.cake_outlined,
                         ),
                         _buildQuickInfoCard(
                           label: 'Joined',
-                          value:
-                              _formatDate(sponsee['joined_sponsorship_date']),
+                          value: _formatDate(
+                              childData['joinedSponsorshipProgram']),
                           icon: Icons.calendar_today_outlined,
                         ),
                       ],
@@ -684,7 +754,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  if (sponsee['location'] != null)
+                  if (childData['location'] != null)
                     Row(
                       children: [
                         Icon(
@@ -697,7 +767,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            sponsee['location'],
+                            childData['location'],
                             style: TextStyle(
                               fontFamily: 'Specify',
                               fontSize: 16,
@@ -712,7 +782,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                   const SizedBox(height: 24),
 
                   // About section
-                  if (sponsee['about'] != null)
+                  if (childData['about'] != null)
                     Container(
                       margin: const EdgeInsets.only(bottom: 24.0),
                       padding: const EdgeInsets.all(20.0),
@@ -760,7 +830,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            sponsee['about'],
+                            childData['about'],
                             style: TextStyle(
                               fontFamily: 'Specify',
                               fontSize: 16,
@@ -777,31 +847,31 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                   _buildInfoCard(
                     title: 'Location',
                     icon: Icons.location_on_outlined,
-                    content: sponsee['location'],
+                    content: childData['location'],
                   ),
                   _buildInfoCard(
                     title: 'Education',
                     icon: Icons.school_outlined,
-                    content: sponsee['education'],
+                    content: childData['school'],
                   ),
                   _buildInfoCard(
                     title: 'Aspiration',
                     icon: Icons.star_outline,
-                    content: sponsee['aspiration'],
+                    content: childData['aspiration'],
                   ),
                   _buildInfoCard(
                     title: 'Hobbies',
                     icon: Icons.sports_basketball_outlined,
-                    content: sponsee['hobby'],
+                    content: childData['hobby'],
                   ),
                   _buildInfoCard(
                     title: 'Family',
                     icon: Icons.people_outline,
-                    content: sponsee['family'],
+                    content: childData['family'],
                   ),
 
                   // How sponsorship helps
-                  if (sponsee['how_sponsorship_will_help'] != null)
+                  if (childData['howSponsorshipWillHelp'] != null)
                     Container(
                       margin: const EdgeInsets.only(bottom: 24.0),
                       padding: const EdgeInsets.all(20.0),
@@ -849,7 +919,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            sponsee['how_sponsorship_will_help'],
+                            childData['howSponsorshipWillHelp'],
                             style: TextStyle(
                               fontFamily: 'Specify',
                               fontSize: 16,

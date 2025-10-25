@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:love_in_action/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/app_messaging.dart';
-import 'register_screen.dart';
-import 'forgot_password_screen.dart';
-import '../main_app_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,11 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         AppMessaging.dismiss();
         AppMessaging.showSuccess('Login successful!');
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const MainAppScreen(),
-          ),
-        );
+        context.go('/app');
       }
     } catch (error) {
       if (mounted) {
@@ -76,11 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
             color:
                 isDark ? AppColors.darkForeground : AppColors.lightForeground,
           ),
-          onPressed: () => Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const WelcomeScreen(),
-            ),
-          ),
+          onPressed: () => context.go('/'),
         ),
       ),
       body: SafeArea(
@@ -192,11 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const ForgotPasswordScreen(),
-                        ),
-                      );
+                      context.push('/forgot-password');
                     },
                     child: const Text(
                       'Forgot Password?',
@@ -252,11 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => const RegisterScreen(),
-                          ),
-                        );
+                        context.go('/register');
                       },
                       child: Text(
                         'Sign Up',

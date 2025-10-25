@@ -1,1 +1,11 @@
-
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.ben25.loveinaction2",
+    "sha256_cert_fingerprints": [
+      "D7:A5:5A:11:94:87:BE:9C:25:65:0C:06:14:C2:70:32:13:E6:0C:DB:9C:BA:FC:93:FA:88:B2:D6:BF:D7:27:8D",
+      "CC:BC:66:0C:20:2D:76:EF:FD:CC:9E:5C:23:72:0C:52:54:FD:9D:68:BF:BA:82:6C:72:18:BD:03:44:BD:B1:41"
+    ]
+  }
+}]

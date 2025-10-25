@@ -104,9 +104,17 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
               itemCount: widget.galleryMedia.length,
               itemBuilder: (context, index) {
                 final media = widget.galleryMedia[index];
-                final filename = media['media']?['filename'];
 
-                if (filename == null) {
+                // Handle Strapi image structure
+                String? imageUrl;
+                final url = media['url'];
+                if (url != null) {
+                  imageUrl = url.startsWith('http')
+                      ? url
+                      : 'https://admin.loveinaction.co$url';
+                }
+
+                if (imageUrl == null) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -133,9 +141,6 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
                     ),
                   );
                 }
-
-                final imageUrl =
-                    'https://ntckmekstkqxqgigqzgn.supabase.co/storage/v1/object/public/Media/$filename';
 
                 return InteractiveViewer(
                   minScale: 0.5,
@@ -232,10 +237,18 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
               itemCount: widget.galleryMedia.length,
               itemBuilder: (context, index) {
                 final media = widget.galleryMedia[index];
-                final filename = media['media']?['filename'];
                 final isSelected = index == _currentIndex;
 
-                if (filename == null) {
+                // Handle Strapi image structure
+                String? imageUrl;
+                final url = media['url'];
+                if (url != null) {
+                  imageUrl = url.startsWith('http')
+                      ? url
+                      : 'https://admin.loveinaction.co$url';
+                }
+
+                if (imageUrl == null) {
                   return Container(
                     width: 80,
                     height: 80,
@@ -258,9 +271,6 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
                     ),
                   );
                 }
-
-                final imageUrl =
-                    'https://ntckmekstkqxqgigqzgn.supabase.co/storage/v1/object/public/Media/$filename';
 
                 return GestureDetector(
                   onTap: () => _goToImage(index),

@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../constants/api_endpoints.dart';
@@ -56,6 +56,69 @@ class DashboardService {
     return me;
   }
 
+  /// Get sponsor information for the authenticated user
+  Future<Map<String, dynamic>?> getSponsorInfo({required String jwt}) async {
+    try {
+      final response = await _getJson(
+        'https://admin.loveinaction.co/api/users/me?populate[sponsor]=true',
+        jwt: jwt,
+      );
+
+      debugPrint('🔍 [DashboardService] Full user/me response: $response');
+
+      // Handle both flat and attributes structure
+      Map<String, dynamic> userData = response;
+      if (response.containsKey('attributes')) {
+        userData = response['attributes'] as Map<String, dynamic>;
+      }
+
+      final sponsorData = userData['sponsor'];
+      debugPrint('🔍 [DashboardService] Sponsor data: $sponsorData');
+
+      if (sponsorData != null) {
+        // Handle both flat and attributes structure for sponsor
+        if (sponsorData is Map<String, dynamic>) {
+          if (sponsorData.containsKey('data')) {
+            return sponsorData['data'] as Map<String, dynamic>?;
+          }
+          return sponsorData;
+        }
+      }
+
+      debugPrint('🔍 [DashboardService] No sponsor data found');
+      return null;
+    } catch (error) {
+      debugPrint('Error fetching sponsor info: $error');
+      return null;
+    }
+  }
+
+  /// Get sponsor ID from sponsors endpoint
+  Future<int?> getSponsorIdFromSponsors(
+      {required String jwt, required String email}) async {
+    try {
+      final sponsorsRes = await _getJson(
+        '${ApiEndpoints.sponsors}?filters[email][\$eq]=$email',
+        jwt: jwt,
+      );
+
+      final sponsors = sponsorsRes['data'] as List<dynamic>?;
+      if (sponsors != null && sponsors.isNotEmpty) {
+        final sponsor = sponsors.first as Map<String, dynamic>;
+        final sponsorId = sponsor['id'];
+        debugPrint(
+            '🔍 [DashboardService] Found sponsor ID from sponsors endpoint: $sponsorId');
+        return sponsorId is int
+            ? sponsorId
+            : int.tryParse(sponsorId.toString());
+      }
+      return null;
+    } catch (error) {
+      debugPrint('Error fetching sponsor ID from sponsors: $error');
+      return null;
+    }
+  }
+
   Future<List<Child>> getChildrenForUser({required String jwt}) async {
     print('[DashboardService] getChildrenForUser() start');
     // 1) Get current user to resolve email (reliable filter across your data)
@@ -97,6 +160,7 @@ class DashboardService {
         sponsorsRes = await _getJson(url, jwt: jwt);
         print('[DashboardService] Sponsors response keys: ' +
             sponsorsRes.keys.join(','));
+        print('[DashboardService] Full sponsors response: $sponsorsRes');
         break;
       } catch (e) {
         print('[DashboardService] Sponsors URL failed: $url => $e');
@@ -190,6 +254,7 @@ class DashboardService {
           '${ApiEndpoints.children}?filters[sponsor][email][\$eq]=$email&populate=images';
       print('[DashboardService] Fallback children URL: $url');
       final res = await _getJson(url, jwt: jwt);
+      print('[DashboardService] Fallback children response: $res');
       final data = res['data'];
       final items = (data is List) ? data : <dynamic>[];
       print('[DashboardService] Fallback children count: ${items.length}');

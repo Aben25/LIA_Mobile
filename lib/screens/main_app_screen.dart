@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/theme_provider.dart';
 import '../providers/strapi_auth_provider.dart';
 import '../constants/app_colors.dart';
 import '../utils/app_messaging.dart';
 import 'dashboard/dashboard_screen.dart';
-import 'auth/login_screen.dart';
 import 'settings/settings_screen.dart';
 import 'projects/projects_screen.dart';
 import 'donations/donations_screen.dart';
@@ -41,12 +41,9 @@ class _MainAppScreenState extends State<MainAppScreen> {
       AppMessaging.showSuccess('Signed out successfully');
 
       if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-          (route) => false,
-        );
+        // Use go_router to navigate to home page
+        // The router will automatically redirect to welcome screen since user is no longer authenticated
+        context.go('/');
       }
     } catch (error) {
       AppMessaging.dismiss();

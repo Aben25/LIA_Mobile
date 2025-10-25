@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Password Reset - Love in Action</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="0; url=https://thomasasfaw.com/reset?code=CODE_PLACEHOLDER">
+</head>
+<body>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h2>Redirecting to Love in Action App...</h2>
+        <p>If the app doesn't open automatically, <a href="#" id="fallback-link">click here</a></p>
+    </div>
+
+    <script>
+        // Function to extract URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Get code from URL
+        var code = getUrlParameter('code');
+        
+        if (code) {
+            // Create the app link URL
+            var appUrl = 'https://thomasasfaw.com/reset?code=' + code;
+            
+            // Set fallback link
+            document.getElementById('fallback-link').href = appUrl;
+            
+            // Try to redirect to the app
+            window.location.href = appUrl;
+            
+            // Fallback: if app doesn't open after 2 seconds, show message
+            setTimeout(function() {
+                document.body.innerHTML = 
+                    '<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">' +
+                    '<h2>Love in Action App Not Found</h2>' +
+                    '<p>Please install the Love in Action app and try again.</p>' +
+                    '<p>Or <a href="' + appUrl + '">click here to try opening the app</a></p>' +
+                    '</div>';
+            }, 2000);
+        } else {
+            document.body.innerHTML = 
+                '<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">' +
+                '<h2>Invalid Link</h2>' +
+                '<p>This reset link is invalid or has expired.</p>' +
+                '</div>';
+        }
+    </script>
+</body>
+</html>

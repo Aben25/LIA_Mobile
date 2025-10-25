@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/app_messaging.dart';
-import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String? initialCode;
@@ -130,11 +130,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               children: [
                 // Back Button
                 IconButton(
-                  onPressed: () => Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                  ),
+                  onPressed: () => context.go('/'),
                   icon: Icon(
                     Icons.arrow_back,
                     color: isDark
@@ -516,11 +512,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => const LoginScreen(),
-                          ),
-                        );
+                        context.go('/');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,

@@ -5,11 +5,13 @@ import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/easy_loading_config.dart';
 import '../children/children_detail_screen.dart';
+import '../team/team_membership_form_screen.dart';
 import '../../services/dashboard_service.dart';
 import '../../services/sponsorship_service.dart';
 import '../../models/child.dart';
 import '../../constants/api_endpoints.dart';
 import '../../components/webview_donation.dart';
+import '../../components/additional_sponsorship_modal.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -23,10 +25,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final SponsorshipService _sponsorshipService = SponsorshipService();
   List<Child> _children = [];
   bool _loading = true;
-  bool _refreshing = false;
   String? _error;
   bool _showSponsorshipWebView = false;
+  bool _showAdditionalSponsorshipModal = false;
+  bool _showTeamMembershipForm = false;
   UserSponsorshipStatus _sponsorshipStatus = UserSponsorshipStatus.newUser;
+  int? _sponsorId;
+  String? _sponsorEmail;
 
   @override
   void initState() {
@@ -51,18 +56,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
         throw Exception('User not authenticated');
       }
 
-      // Fetch both children and sponsorship status in parallel
+      // Get user email from auth provider first
+      final authProvider =
+          Provider.of<StrapiAuthProvider>(context, listen: false);
+      final userEmail = authProvider.user?.email;
+
+      if (userEmail == null || userEmail.isEmpty) {
+        throw Exception('User email not found');
+      }
+
+      // Fetch children, sponsorship status, and sponsor ID in parallel
       final results = await Future.wait([
         _service.getChildrenForUser(jwt: jwt),
         _sponsorshipService.getUserSponsorshipStatus(jwt: jwt),
+        _service.getSponsorIdFromSponsors(jwt: jwt, email: userEmail),
       ]);
 
       final children = results[0] as List<Child>;
       final sponsorshipStatus = results[1] as UserSponsorshipStatus;
+      final sponsorId = results[2] as int?;
+
+      debugPrint('🔍 [Dashboard] User email: $userEmail');
+      debugPrint('🔍 [Dashboard] Sponsor ID: $sponsorId');
+      debugPrint('🔍 [Dashboard] Children count: ${children.length}');
+
+      // Debug: Log all children being loaded in dashboard
+      for (final child in children) {
+        debugPrint(
+            '🔍 [Dashboard] Loading child: id=${child.id}, liaId=${child.liaId}, documentId=${child.documentId}, name=${child.fullName}');
+      }
 
       setState(() {
         _children = children;
         _sponsorshipStatus = sponsorshipStatus;
+        _sponsorId = sponsorId;
+        _sponsorEmail = userEmail;
         _loading = false;
       });
     } catch (error) {
@@ -77,17 +105,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _onRefresh() async {
-    setState(() {
-      _refreshing = true;
-    });
-
     await _fetchChildren();
-
-    if (mounted) {
-      setState(() {
-        _refreshing = false;
-      });
-    }
   }
 
   void _openSponsorshipWebView() {
@@ -107,6 +125,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     debugPrint(
         '🎯 [Dashboard] Opening sponsorship WebView for status: $_sponsorshipStatus');
+  }
+
+  void _openTeamMembershipForm() {
+    debugPrint('🎯 [Dashboard] Join Team button pressed!');
+    setState(() {
+      _showTeamMembershipForm = true;
+    });
   }
 
   int _calculateAge(String? dateOfBirth) {
@@ -166,10 +191,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return InkWell(
       onTap: () {
+        // Use documentId first (most stable), then liaId, then database id
+        final childId = child.documentId ?? child.liaId ?? child.id.toString();
+        debugPrint(
+            '🔍 [Dashboard] Navigating to child detail for ID: $childId');
+        debugPrint('🔍 [Dashboard] Child name: ${child.fullName}');
+        debugPrint('🔍 [Dashboard] Child liaId: ${child.liaId}');
+        debugPrint('🔍 [Dashboard] Child documentId: ${child.documentId}');
+        debugPrint('🔍 [Dashboard] Child database id: ${child.id}');
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ChildrenDetailScreen(
-              childId: child.id.toString(),
+              childId: childId,
             ),
           ),
         );
@@ -448,6 +481,220 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildAdditionalSponsorshipSection() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkMutedForeground
+              : AppColors.lightMutedForeground,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.favorite,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sponsor Another Child',
+                        style: TextStyle(
+                          fontFamily: 'Specify',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? AppColors.darkForeground
+                              : AppColors.lightForeground,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'There are more children who could benefit from your support.',
+                        style: TextStyle(
+                          fontFamily: 'Specify',
+                          fontSize: 14,
+                          color: isDark
+                              ? AppColors.darkMutedForeground
+                              : AppColors.lightMutedForeground,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  debugPrint(
+                      '🔍 [Dashboard] Additional sponsorship button pressed');
+                  debugPrint('🔍 [Dashboard] Sponsor ID: $_sponsorId');
+                  debugPrint('🔍 [Dashboard] Sponsor Email: $_sponsorEmail');
+
+                  if (_sponsorId == null || _sponsorId == 0) {
+                    debugPrint('🔍 [Dashboard] Error: Sponsor ID is null or 0');
+                    EasyLoadingConfig.showError(
+                        'Unable to submit request: Sponsor information not found');
+                    return;
+                  }
+
+                  setState(() {
+                    _showAdditionalSponsorshipModal = true;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.favorite,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Sponsor Another Child',
+                      style: TextStyle(
+                        fontFamily: 'Specify',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildJoinTeamSection() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkMutedForeground
+              : AppColors.lightMutedForeground,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.group_add,
+                color: AppColors.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Join Our Team',
+                  style: TextStyle(
+                    fontFamily: 'Specify',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.darkForeground
+                        : AppColors.lightForeground,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'We\'d love to have you join our mission! Help us make a difference in children\'s lives.',
+            style: TextStyle(
+              fontFamily: 'Specify',
+              fontSize: 14,
+              color: isDark
+                  ? AppColors.darkMutedForeground
+                  : AppColors.lightMutedForeground,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: _openTeamMembershipForm,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                side: BorderSide(
+                  color: AppColors.primary,
+                  width: 2,
+                ),
+              ),
+              child: Text(
+                'Join the Team',
+                style: TextStyle(
+                  fontFamily: 'Specify',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildErrorState() {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
@@ -550,8 +797,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
               else
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildChildCard(_children[index]),
-                    childCount: _children.length,
+                    (context, index) {
+                      if (index < _children.length) {
+                        return _buildChildCard(_children[index]);
+                      } else if (index == _children.length) {
+                        // Add "Sponsor Another Child" button after all children
+                        return _buildAdditionalSponsorshipSection();
+                      } else {
+                        // Add "Join Team" section after sponsorship section
+                        return _buildJoinTeamSection();
+                      }
+                    },
+                    childCount: _children.length +
+                        2, // +1 for sponsorship, +1 for join team
                   ),
                 ),
             ],
@@ -585,7 +843,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
               return const SizedBox.shrink();
             },
           ),
-        ]
+        ],
+        // Additional Sponsorship Modal
+        AdditionalSponsorshipModal(
+          isOpen: _showAdditionalSponsorshipModal,
+          onClose: () {
+            setState(() {
+              _showAdditionalSponsorshipModal = false;
+            });
+          },
+          sponsorId: _sponsorId ?? 0,
+          sponsorEmail: _sponsorEmail ?? '',
+          onSuccess: () {
+            // Refresh the data after successful submission
+            _fetchChildren();
+          },
+        ),
+
+        // Team Membership Form Modal
+        if (_showTeamMembershipForm)
+          TeamMembershipFormScreen(
+            onSuccess: () {
+              setState(() {
+                _showTeamMembershipForm = false;
+              });
+            },
+            onClose: () {
+              setState(() {
+                _showTeamMembershipForm = false;
+              });
+            },
+          ),
       ],
     );
   }

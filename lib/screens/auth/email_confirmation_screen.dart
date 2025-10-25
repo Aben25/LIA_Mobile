@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/app_messaging.dart';
-import 'login_screen.dart';
 
 class EmailConfirmationScreen extends StatefulWidget {
   final String? token;
@@ -60,13 +60,10 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
         });
       }
 
-      // Wait a moment then navigate to login screen
+      // Wait a moment then navigate to home screen
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-            (route) => false,
-          );
+          context.go('/');
         }
       });
     } catch (error) {
@@ -92,13 +89,10 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
           });
         }
 
-        // Navigate to login screen
+        // Navigate to home screen
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const LoginScreen()),
-              (route) => false,
-            );
+            context.go('/');
           }
         });
       } else {
@@ -114,13 +108,10 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
           });
         }
 
-        // Still navigate to login screen after a delay
+        // Still navigate to home screen after a delay
         Future.delayed(const Duration(seconds: 3), () {
           if (mounted) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const LoginScreen()),
-              (route) => false,
-            );
+            context.go('/');
           }
         });
       }
@@ -167,7 +158,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
             color:
                 isDark ? AppColors.darkForeground : AppColors.lightForeground,
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.go('/'),
         ),
         title: Text(
           'Email Confirmation',
@@ -224,7 +215,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
+                    onPressed: () => context.go('/'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
@@ -281,7 +272,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => context.go('/'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: isDark
                               ? AppColors.darkForeground
@@ -387,7 +378,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                     width: double.infinity,
                     height: 50,
                     child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => context.go('/'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: isDark
                             ? AppColors.darkForeground
