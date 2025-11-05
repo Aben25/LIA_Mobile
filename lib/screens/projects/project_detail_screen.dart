@@ -647,6 +647,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                               if (project.blogLink!.body != null)
                                 ...project.blogLink!.body!.map(
                                   (block) {
+                                    print('[PROJECT] Block type: ${block['type']}, children: ${block['children']}');
                                     if (block['type'] == 'heading') {
                                       final text = (block['children'] as List)
                                           .map((e) => e['text'])
@@ -666,18 +667,20 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                       final text = (block['children'] as List)
                                           .map((e) => e['text'])
                                           .join();
+                                      print('[PROJECT] Paragraph text: $text');
+                                      if (text.trim().isEmpty) return const SizedBox.shrink();
                                       return Padding(
                                         padding:
-                                            const EdgeInsets.only(top: 8.0),
+                                            const EdgeInsets.only(top: 8.0, bottom: 8.0),
                                         child: Text(
                                           text,
                                           style: TextStyle(
                                             fontFamily: 'Specify',
                                             fontSize: 16,
+                                            height: 1.5,
                                             color: isDark
-                                                ? AppColors.darkMutedForeground
-                                                : AppColors
-                                                    .lightMutedForeground,
+                                                ? AppColors.darkForeground
+                                                : AppColors.lightForeground,
                                           ),
                                         ),
                                       );
@@ -688,9 +691,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(
                                             vertical: 12.0),
-                                        child: Image.network(imageUrl),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.network(imageUrl),
+                                        ),
                                       );
                                     } else {
+                                      print('[PROJECT] Unknown block type: ${block['type']}');
                                       return const SizedBox.shrink();
                                     }
                                   },

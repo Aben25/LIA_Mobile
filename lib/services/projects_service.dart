@@ -47,6 +47,18 @@ class ProjectsService {
     final causes = <Cause>[];
     for (final item in items) {
       if (item is Map<String, dynamic>) {
+        // Debug: log the raw item to see what we're getting
+        print('[ProjectsService] Raw item keys: ${item.keys.join(", ")}');
+        if (item.containsKey('blogLink')) {
+          print('[ProjectsService] blogLink keys: ${(item['blogLink'] as Map?)?.keys.join(", ")}');
+          if (item['blogLink'] is Map && (item['blogLink'] as Map).containsKey('body')) {
+            final body = (item['blogLink'] as Map)['body'];
+            print('[ProjectsService] blogLink.body type: ${body.runtimeType}, length: ${body is List ? body.length : 'N/A'}');
+            if (body is List && body.isNotEmpty) {
+              print('[ProjectsService] First body item: ${body.first}');
+            }
+          }
+        }
         causes.add(Cause.fromJson(item));
       }
     }

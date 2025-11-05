@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/api_endpoints.dart';
 import '../../utils/easy_loading_config.dart';
 import '../../utils/network_error_handler.dart';
 import '../../services/child_detail_service.dart';
@@ -71,6 +74,7 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
         });
       }
     } catch (error) {
+      print('[CHILDREN] Error fetching sponsee details: $error');
       if (mounted) {
         setState(() {
           _error = NetworkErrorHandler.getErrorMessage(error);
