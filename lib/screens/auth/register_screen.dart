@@ -75,21 +75,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
         final hasToken = strapiAuthProvider.jwt != null &&
             strapiAuthProvider.jwt!.isNotEmpty;
         if (hasToken) {
-          AppMessaging.showSuccess('Account created! Logged in successfully.');
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const MainAppScreen(),
-            ),
-          );
+          // Schedule navigation after current frame to avoid Navigator lock
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              AppMessaging.showSuccess(
+                  'Account created! Logged in successfully.');
+              // Navigate after a brief delay to allow success message to show
+              Future.delayed(const Duration(milliseconds: 800), () {
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const MainAppScreen(),
+                    ),
+                  );
+                }
+              });
+            }
+          });
         } else {
           // Email confirmation enabled: no JWT until email is confirmed
-          AppMessaging.showInfo(
-              'Account created! Please check your email to confirm your account before signing in.');
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const LoginScreen(),
-            ),
-          );
+          // Schedule navigation after current frame to avoid Navigator lock
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              AppMessaging.showInfo(
+                  'Account created! Please check your email to confirm your account before signing in.');
+              // Navigate after a brief delay to allow info message to show
+              Future.delayed(const Duration(milliseconds: 800), () {
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                  );
+                }
+              });
+            }
+          });
         }
       }
     } catch (error) {

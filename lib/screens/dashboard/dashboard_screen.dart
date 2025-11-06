@@ -26,7 +26,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Child> _children = [];
   bool _loading = true;
   String? _error;
-  bool _showSponsorshipWebView = false;
   bool _showAdditionalSponsorshipModal = false;
   bool _showTeamMembershipForm = false;
   UserSponsorshipStatus _sponsorshipStatus = UserSponsorshipStatus.newUser;
@@ -36,8 +35,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint(
-        '🎯 [Dashboard] initState() called - _showSponsorshipWebView: $_showSponsorshipWebView');
     _fetchChildren();
   }
 
@@ -119,12 +116,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return;
     }
 
-    setState(() {
-      _showSponsorshipWebView = true;
-    });
-
     debugPrint(
         '🎯 [Dashboard] Opening sponsorship WebView for status: $_sponsorshipStatus');
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => WebViewDonation(
+          url: _sponsorshipService.getZeffyFormUrl(_sponsorshipStatus),
+          title: _sponsorshipService.getButtonText(_sponsorshipStatus),
+          onClose: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        fullscreenDialog: true,
+      ),
+    );
   }
 
   void _openTeamMembershipForm() {
@@ -407,76 +413,85 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
 
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.favorite_border,
-                size: 80,
-                color: isDark
-                    ? AppColors.darkMutedForeground
-                    : AppColors.lightMutedForeground,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'No Sponsored Children Yet',
-                style: TextStyle(
-                  fontFamily: 'Specify',
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: isDark
-                      ? AppColors.darkForeground
-                      : AppColors.lightForeground,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'You haven\'t been assigned any sponsored children yet. This usually happens for new users or when your account is still being set up.',
-                style: TextStyle(
-                  fontFamily: 'Specify',
-                  fontSize: 16,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Empty state message
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.favorite_border,
+                  size: 80,
                   color: isDark
                       ? AppColors.darkMutedForeground
                       : AppColors.lightMutedForeground,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _sponsorshipService
-                        .shouldShowSponsorshipButton(_sponsorshipStatus)
-                    ? () {
-                        debugPrint(
-                            '🎯 [Dashboard] Sponsorship button onPressed triggered');
-                        _openSponsorshipWebView();
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 24),
+                Text(
+                  'No Sponsored Children Yet',
+                  style: TextStyle(
+                    fontFamily: 'Specify',
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.darkForeground
+                        : AppColors.lightForeground,
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  textAlign: TextAlign.center,
                 ),
-                child: Text(
-                  _sponsorshipService.getButtonText(_sponsorshipStatus),
-                  style: const TextStyle(
+                const SizedBox(height: 16),
+                Text(
+                  'You haven\'t been assigned any sponsored children yet. This usually happens for new users or when your account is still being set up.',
+                  style: TextStyle(
                     fontFamily: 'Specify',
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? AppColors.darkMutedForeground
+                        : AppColors.lightMutedForeground,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: _sponsorshipService
+                          .shouldShowSponsorshipButton(_sponsorshipStatus)
+                      ? () {
+                          debugPrint(
+                              '🎯 [Dashboard] Sponsorship button onPressed triggered');
+                          _openSponsorshipWebView();
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                  ),
+                  child: Text(
+                    _sponsorshipService.getButtonText(_sponsorshipStatus),
+                    style: const TextStyle(
+                      fontFamily: 'Specify',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          const SizedBox(height: 8),
+          // One-Time Donation Card
+          _buildOneTimeDonationSection(),
+          // Join Team Card
+          _buildJoinTeamSection(),
+        ],
       ),
     );
   }
@@ -599,6 +614,121 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildOneTimeDonationSection() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? AppColors.darkMutedForeground
+              : AppColors.lightMutedForeground,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.volunteer_activism,
+                color: AppColors.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Make a One-Time Donation',
+                  style: TextStyle(
+                    fontFamily: 'Specify',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.darkForeground
+                        : AppColors.lightForeground,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Every donation counts. Your one-time gift helps fund immediate needs like food assistance, educational supplies, and community development projects that improve lives.',
+            style: TextStyle(
+              fontFamily: 'Specify',
+              fontSize: 14,
+              color: isDark
+                  ? AppColors.darkMutedForeground
+                  : AppColors.lightMutedForeground,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _openDonationPage,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.favorite,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Donate Now',
+                    style: TextStyle(
+                      fontFamily: 'Specify',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openDonationPage() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => WebViewDonation(
+          url:
+              'https://www.zeffy.com/donation-form/make-a-one-time-donation-for-your-sponsee',
+          title: 'Make a Donation',
+          onClose: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        fullscreenDialog: true,
       ),
     );
   }
@@ -763,8 +893,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(
-        '🎯 [Dashboard] build() called - _showSponsorshipWebView: $_showSponsorshipWebView');
     return Stack(
       children: [
         RefreshIndicator(
@@ -803,47 +931,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       } else if (index == _children.length) {
                         // Add "Sponsor Another Child" button after all children
                         return _buildAdditionalSponsorshipSection();
+                      } else if (index == _children.length + 1) {
+                        // Add "One-Time Donation" section
+                        return _buildOneTimeDonationSection();
                       } else {
-                        // Add "Join Team" section after sponsorship section
+                        // Add "Join Team" section after donation section
                         return _buildJoinTeamSection();
                       }
                     },
                     childCount: _children.length +
-                        2, // +1 for sponsorship, +1 for join team
+                        3, // +1 for sponsorship, +1 for donation, +1 for join team
                   ),
                 ),
             ],
           ),
         ),
-        // Sponsorship WebView Modal
-        if (_showSponsorshipWebView) ...[
-          Builder(
-            builder: (context) {
-              debugPrint(
-                  '🎯 [Dashboard] Rendering WebView modal - _showSponsorshipWebView: $_showSponsorshipWebView');
-              return WebViewDonation(
-                url: _sponsorshipService.getZeffyFormUrl(_sponsorshipStatus),
-                title: _sponsorshipService.getButtonText(_sponsorshipStatus),
-                onClose: () {
-                  debugPrint('🎯 [Dashboard] WebView close button pressed');
-                  setState(() {
-                    _showSponsorshipWebView = false;
-                  });
-                  debugPrint(
-                      '🎯 [Dashboard] WebView closed - _showSponsorshipWebView: $_showSponsorshipWebView');
-                },
-              );
-            },
-          ),
-        ] else ...[
-          Builder(
-            builder: (context) {
-              debugPrint(
-                  '🎯 [Dashboard] WebView modal NOT rendering - _showSponsorshipWebView: $_showSponsorshipWebView');
-              return const SizedBox.shrink();
-            },
-          ),
-        ],
         // Additional Sponsorship Modal
         AdditionalSponsorshipModal(
           isOpen: _showAdditionalSponsorshipModal,
