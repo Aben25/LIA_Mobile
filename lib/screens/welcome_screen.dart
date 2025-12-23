@@ -27,38 +27,11 @@ class WelcomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Logo
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.3),
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.favorite,
-                      size: 50,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  // App Name
-                  Text(
-                    'Love in Action',
-                    style: TextStyle(
-                      fontFamily: 'Specify',
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? AppColors.darkForeground
-                          : AppColors.lightForeground,
-                    ),
+                  Image.asset(
+                    'assets/icon/icon.png',
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 16),
                   // Tagline

@@ -1,14 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
-import '../../constants/api_endpoints.dart';
 import '../../utils/easy_loading_config.dart';
 import '../../utils/network_error_handler.dart';
 import '../../services/child_detail_service.dart';
+import '../../components/media_widget.dart';
 import 'full_gallery_screen.dart';
 
 class ChildrenDetailScreen extends StatefulWidget {
@@ -446,27 +444,40 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          imageUrl,
+                        child: MediaWidget(
+                          url: imageUrl,
                           fit: BoxFit.cover,
-                          alignment: Alignment.topCenter,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? AppColors.darkMutedForeground
-                                    : AppColors.lightMutedForeground,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Icons.image,
-                                size: 32,
-                                color: isDark
-                                    ? AppColors.darkBackground
-                                    : AppColors.lightBackground,
-                              ),
-                            );
-                          },
+                          showVideoControls: false,
+                          placeholder: Container(
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.darkMutedForeground
+                                  : AppColors.lightMutedForeground,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.image,
+                              size: 32,
+                              color: isDark
+                                  ? AppColors.darkBackground
+                                  : AppColors.lightBackground,
+                            ),
+                          ),
+                          errorWidget: Container(
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.darkMutedForeground
+                                  : AppColors.lightMutedForeground,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.image,
+                              size: 32,
+                              color: isDark
+                                  ? AppColors.darkBackground
+                                  : AppColors.lightBackground,
+                            ),
+                          ),
                         ),
                       ),
                       // Caption overlay if exists
@@ -671,24 +682,36 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                   height: 400,
                   width: double.infinity,
                   child: imageUrl != null
-                      ? Image.network(
-                          imageUrl,
+                      ? MediaWidget(
+                          url: imageUrl,
                           fit: BoxFit.cover,
-                          alignment: Alignment.topCenter,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
+                          width: double.infinity,
+                          height: 400,
+                          showVideoControls: true,
+                          placeholder: Container(
+                            color: isDark
+                                ? AppColors.darkMutedForeground
+                                : AppColors.lightMutedForeground,
+                            child: Icon(
+                              Icons.person,
+                              size: 80,
                               color: isDark
-                                  ? AppColors.darkMutedForeground
-                                  : AppColors.lightMutedForeground,
-                              child: Icon(
-                                Icons.person,
-                                size: 80,
-                                color: isDark
-                                    ? AppColors.darkBackground
-                                    : AppColors.lightBackground,
-                              ),
-                            );
-                          },
+                                  ? AppColors.darkBackground
+                                  : AppColors.lightBackground,
+                            ),
+                          ),
+                          errorWidget: Container(
+                            color: isDark
+                                ? AppColors.darkMutedForeground
+                                : AppColors.lightMutedForeground,
+                            child: Icon(
+                              Icons.person,
+                              size: 80,
+                              color: isDark
+                                  ? AppColors.darkBackground
+                                  : AppColors.lightBackground,
+                            ),
+                          ),
                         )
                       : Container(
                           color: isDark

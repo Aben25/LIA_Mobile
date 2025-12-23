@@ -12,6 +12,7 @@ import '../../models/child.dart';
 import '../../constants/api_endpoints.dart';
 import '../../components/webview_donation.dart';
 import '../../components/additional_sponsorship_modal.dart';
+import '../../components/media_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -260,16 +261,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         : ApiEndpoints.baseUrl.replaceFirst('/api', '') + url;
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(40),
-                      child: Image.network(
-                        absoluteUrl,
+                      child: MediaWidget(
+                        url: absoluteUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.person,
-                            size: 40,
-                            color: AppColors.primary,
-                          );
-                        },
+                        width: 80,
+                        height: 80,
+                        showVideoControls: false,
+                        placeholder: Icon(
+                          Icons.person,
+                          size: 40,
+                          color: AppColors.primary,
+                        ),
+                        errorWidget: Icon(
+                          Icons.person,
+                          size: 40,
+                          color: AppColors.primary,
+                        ),
                       ),
                     );
                   },

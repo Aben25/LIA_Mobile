@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../constants/app_colors.dart';
+import '../../components/media_widget.dart';
 
 class FullGalleryScreen extends StatefulWidget {
   final List<Map<String, dynamic>> galleryMedia;
@@ -142,38 +143,79 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
                   );
                 }
 
+                // Check if it's a video
+                final isVideo = imageUrl.toLowerCase().endsWith('.mp4') ||
+                    imageUrl.toLowerCase().endsWith('.mov') ||
+                    imageUrl.toLowerCase().endsWith('.avi') ||
+                    imageUrl.toLowerCase().endsWith('.mkv') ||
+                    imageUrl.toLowerCase().endsWith('.webm') ||
+                    imageUrl.toLowerCase().endsWith('.m4v');
+
+                if (isVideo) {
+                  return Center(
+                    child: MediaWidget(
+                      url: imageUrl,
+                      fit: BoxFit.contain,
+                      showVideoControls: true,
+                      autoPlay: false,
+                      errorWidget: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 80,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Failed to load video',
+                              style: TextStyle(
+                                fontFamily: 'Specify',
+                                fontSize: 18,
+                                color: isDark
+                                    ? AppColors.darkMutedForeground
+                                    : AppColors.lightMutedForeground,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
                 return InteractiveViewer(
                   minScale: 0.5,
                   maxScale: 3.0,
                   child: Center(
-                    child: Image.network(
-                      imageUrl,
+                    child: MediaWidget(
+                      url: imageUrl,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 80,
-                                color: Colors.red,
+                      showVideoControls: false,
+                      errorWidget: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 80,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Failed to load image',
+                              style: TextStyle(
+                                fontFamily: 'Specify',
+                                fontSize: 18,
+                                color: isDark
+                                    ? AppColors.darkMutedForeground
+                                    : AppColors.lightMutedForeground,
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Failed to load image',
-                                style: TextStyle(
-                                  fontFamily: 'Specify',
-                                  fontSize: 18,
-                                  color: isDark
-                                      ? AppColors.darkMutedForeground
-                                      : AppColors.lightMutedForeground,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -291,25 +333,52 @@ class _FullGalleryScreenState extends State<FullGalleryScreen> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(7),
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? AppColors.darkMutedForeground
-                                  : AppColors.lightMutedForeground,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          MediaWidget(
+                            url: imageUrl,
+                            fit: BoxFit.cover,
+                            showVideoControls: false,
+                            errorWidget: Container(
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.darkMutedForeground
+                                    : AppColors.lightMutedForeground,
+                              ),
+                              child: Icon(
+                                Icons.image,
+                                size: 32,
+                                color: isDark
+                                    ? AppColors.darkBackground
+                                    : AppColors.lightBackground,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.image,
-                              size: 32,
-                              color: isDark
-                                  ? AppColors.darkBackground
-                                  : AppColors.lightBackground,
+                          ),
+                          // Video indicator overlay
+                          if (imageUrl.toLowerCase().endsWith('.mp4') ||
+                              imageUrl.toLowerCase().endsWith('.mov') ||
+                              imageUrl.toLowerCase().endsWith('.avi') ||
+                              imageUrl.toLowerCase().endsWith('.mkv') ||
+                              imageUrl.toLowerCase().endsWith('.webm') ||
+                              imageUrl.toLowerCase().endsWith('.m4v'))
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Icon(
+                                  Icons.play_circle_outline,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                          );
-                        },
+                        ],
                       ),
                     ),
                   ),
