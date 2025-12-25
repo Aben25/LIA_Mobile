@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../constants/app_colors.dart';
 import '../models/cause.dart';
 import '../utils/network_error_handler.dart';
-import 'auth/login_screen.dart';
 import 'projects/project_detail_screen.dart';
 import '../services/projects_service.dart';
 
@@ -77,11 +77,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
   }
 
   void _navigateToSignIn() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
-    );
+    context.push('/login');
   }
 
   Widget _buildProjectCard(Cause project) {
@@ -263,7 +259,7 @@ class _GuestProjectsScreenState extends State<GuestProjectsScreen> {
             color:
                 isDark ? AppColors.darkForeground : AppColors.lightForeground,
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
         title: Text(
           'Browse Projects',

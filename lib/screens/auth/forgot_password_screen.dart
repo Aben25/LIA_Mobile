@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/app_messaging.dart';
-import 'login_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -291,11 +291,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => const LoginScreen(),
-                          ),
-                        );
+                        context.go('/login');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,

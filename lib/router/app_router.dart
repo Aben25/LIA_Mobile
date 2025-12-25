@@ -7,6 +7,7 @@ import '../screens/auth/reset_password_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
+import '../screens/guest_projects_screen.dart';
 import '../providers/strapi_auth_provider.dart';
 import '../utils/app_messaging.dart';
 
@@ -96,6 +97,13 @@ class AppRouter {
           path: '/forgot-password',
           name: 'forgot-password',
           builder: (context, state) => const ForgotPasswordScreen(),
+        ),
+
+        // Guest projects screen
+        GoRoute(
+          path: '/guest-projects',
+          name: 'guest-projects',
+          builder: (context, state) => const GuestProjectsScreen(),
         ),
 
         // Main app screen (after authentication)

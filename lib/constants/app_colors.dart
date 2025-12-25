@@ -40,7 +40,9 @@ class AppColors {
   static const Color darkRing = Color(0xFFD6D6D6);
 
   // Brand Colors
-  static const Color primary = Color(0xFF2563EB);
+  // static const Color primary = Color(0xFF2563EB);
+  // change #ef6824 to flutter color
+  static const Color primary = Color(0xFFef6824);
   static const Color primaryLight = Color(0xFF3B82F6);
   static const Color primaryDark = Color(0xFF1D4ED8);
   static const Color secondary = Color(0xFF10B981);

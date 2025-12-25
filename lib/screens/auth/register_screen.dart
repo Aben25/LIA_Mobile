@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:love_in_action/screens/welcome_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/strapi_auth_provider.dart';
@@ -7,8 +7,6 @@ import '../../constants/app_colors.dart';
 import '../../utils/app_messaging.dart';
 import '../../utils/password_validator.dart';
 import '../../widgets/password_strength_indicator.dart';
-import 'login_screen.dart';
-import '../main_app_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -83,11 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               // Navigate after a brief delay to allow success message to show
               Future.delayed(const Duration(milliseconds: 800), () {
                 if (mounted) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const MainAppScreen(),
-                    ),
-                  );
+                  context.go('/app');
                 }
               });
             }
@@ -102,11 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               // Navigate after a brief delay to allow info message to show
               Future.delayed(const Duration(milliseconds: 800), () {
                 if (mounted) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                  );
+                  context.go('/login');
                 }
               });
             }
@@ -145,13 +135,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               color:
                   isDark ? AppColors.darkForeground : AppColors.lightForeground,
             ),
-            onPressed: () => {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const WelcomeScreen(),
-                    ),
-                  )
-                }),
+            onPressed: () => context.pop()),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -436,11 +420,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => const LoginScreen(),
-                          ),
-                        );
+                        context.go('/login');
                       },
                       child: Text(
                         'Sign In',
