@@ -57,6 +57,8 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
           childId: widget.childId,
           jwt: jwt,
         );
+
+        print('🔍 [CHILDREN] Child data primary method: $childData');
       } catch (e) {
         print('🔍 [CHILDREN] Primary method failed, trying filter method: $e');
         childData = await _service.getChildDetailByFilter(
@@ -125,6 +127,45 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
       'Dec'
     ];
     return months[month - 1];
+  }
+
+  String _calculateTimeInProgram(String? joinedDate) {
+    if (joinedDate == null) return 'Unknown';
+    try {
+      final joined = DateTime.parse(joinedDate);
+      final now = DateTime.now();
+      final difference = now.difference(joined);
+
+      final years = difference.inDays ~/ 365;
+      final months = (difference.inDays % 365) ~/ 30;
+
+      if (years > 0) {
+        return months > 0
+            ? '$years year${years > 1 ? 's' : ''} $months month${months > 1 ? 's' : ''}'
+            : '$years year${years > 1 ? 's' : ''}';
+      } else if (months > 0) {
+        return '$months month${months > 1 ? 's' : ''}';
+      } else {
+        final days = difference.inDays;
+        return '$days day${days > 1 ? 's' : ''}';
+      }
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
+
+  String _formatBoolean(dynamic value) {
+    if (value == null) return 'Unknown';
+    if (value is bool) {
+      return value ? 'Yes' : 'No';
+    }
+    final strValue = value.toString().toLowerCase();
+    if (strValue == 'true' || strValue == '1' || strValue == 'yes') {
+      return 'Yes';
+    } else if (strValue == 'false' || strValue == '0' || strValue == 'no') {
+      return 'No';
+    }
+    return value.toString();
   }
 
   Widget _buildInfoCard({
@@ -895,6 +936,42 @@ class _ChildrenDetailScreenState extends State<ChildrenDetailScreen> {
                     title: 'Family',
                     icon: Icons.people_outline,
                     content: childData['family'],
+                  ),
+                  _buildInfoCard(
+                    title: 'Current Grade',
+                    icon: Icons.grade_outlined,
+                    content: childData['currentGrade']?.toString(),
+                  ),
+                  _buildInfoCard(
+                    title: 'Walk to School',
+                    icon: Icons.directions_walk_outlined,
+                    content: _formatBoolean(
+                      childData['walkToSchool'] ?? childData['walk_to_school'],
+                    ),
+                  ),
+                  _buildInfoCard(
+                    title: 'Time in Program',
+                    icon: Icons.access_time_outlined,
+                    content: _calculateTimeInProgram(
+                      childData['joinedSponsorshipProgram']?.toString(),
+                    ),
+                  ),
+                  _buildInfoCard(
+                    title: 'Joined Program',
+                    icon: Icons.calendar_today_outlined,
+                    content: _formatDate(
+                      childData['joinedSponsorshipProgram']?.toString(),
+                    ),
+                  ),
+                  _buildInfoCard(
+                    title: 'Age at Joining',
+                    icon: Icons.cake_outlined,
+                    content: childData['ageAtJoining']?.toString(),
+                  ),
+                  _buildInfoCard(
+                    title: 'Grade at Joining',
+                    icon: Icons.school_outlined,
+                    content: childData['gradeAtJoining']?.toString(),
                   ),
 
                   // How sponsorship helps
